@@ -38,7 +38,9 @@ nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 
 .meal-total{font-size:12px;color:#cdeaa6;margin-top:5px}.meal-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 .choice{margin-top:8px}.choice button{width:100%;text-align:left;background:var(--card2);color:var(--text);border:1px solid var(--line);padding:13px;border-radius:12px}
 .qty{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-</style>
+
+.food-search{display:flex;gap:8px}.food-search input{flex:1;margin:0}.search-results{display:grid;gap:8px;margin-top:12px}.food-result{background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:12px;cursor:pointer}.food-result:hover{border-color:var(--accent)}.food-result b{display:block;font-size:14px}.food-result span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.serving-box{display:grid;grid-template-columns:1fr 1fr;gap:8px}.food-source{font-size:10px;color:var(--muted);margin-top:9px}
+.scanner-video{width:100%;max-height:55vh;border-radius:15px;background:#050606;object-fit:cover}.scan-frame{position:relative;margin-top:12px}.scan-frame:after{content:'';position:absolute;left:12%;right:12%;top:46%;border-top:2px solid var(--accent);box-shadow:0 0 0 9999px rgba(0,0,0,.05);pointer-events:none}.scan-status{margin-top:8px;font-size:12px;color:var(--muted)}</style>
 </head>
 <body>
 <div class="app">
@@ -89,7 +91,7 @@ nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 
 <section id="nutrition" class="screen">
   <div class="top">
     <div><h1>Nutrition</h1><div class="sub">Your meals • 2,300 kcal • 150 g protein</div></div>
-    <button class="icon" onclick="openFoodModal(-1)">＋</button>
+    <div style="display:flex;gap:7px"><button class="secondary" onclick="openScanner()">▣ Scan</button><button class="icon" onclick="openFoodModal(-1)">＋</button></div>
   </div>
   <div class="grid">
     <div class="card">
@@ -149,23 +151,55 @@ nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 
 </nav>
 
 
+
+
+<div id="scannerModal" class="modal-backdrop" style="display:none" onclick="closeScanner(event)">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="row">
+      <div><h2>Scan Barcode</h2><div class="sub">Point your camera at the product barcode.</div></div>
+      <button class="secondary" onclick="closeScanner()">✕</button>
+    </div>
+    <div class="scan-frame">
+      <video id="scannerVideo" class="scanner-video" playsinline muted></video>
+    </div>
+    <div id="scanStatus" class="scan-status">Starting camera…</div>
+    <div class="actions" style="margin-top:12px">
+      <button class="secondary" onclick="stopScanner()">STOP CAMERA</button>
+      <button class="secondary" onclick="manualBarcode()">ENTER BARCODE</button>
+    </div>
+  </div>
+</div>
+
 <div id="foodModal" class="modal-backdrop" style="display:none" onclick="closeFoodModal(event)">
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="row">
-      <div><h2 id="foodModalTitle">Add Food</h2><div class="sub">Add calories and protein to a meal.</div></div>
+      <div><h2>Add Food</h2><div class="sub">Search the food database. You enter the amount; the app handles the macros.</div></div>
       <button class="secondary" onclick="closeFoodModal()">✕</button>
     </div>
-    <div style="margin-top:12px">
-      <div class="label">Food name</div><input id="foodName" placeholder="Chicken breast">
-      <div class="qty">
-        <div><div class="label">Calories</div><input id="foodCal" type="number" placeholder="200"></div>
-        <div><div class="label">Protein (g)</div><input id="foodProtein" type="number" placeholder="30"></div>
-      </div>
-      <div class="label">Meal</div>
-      <select id="foodMeal"><option value="0">Breakfast</option><option value="1">Lunch</option><option value="2">Post-workout</option><option value="3">Dinner</option></select>
-      <button style="width:100%;margin-top:7px" onclick="saveFoodModal()">ADD FOOD</button>
+
+    <div class="food-search" style="margin-top:12px">
+      <input id="foodSearch" placeholder="Search e.g. banana, chicken breast, Greek yogurt" onkeydown="if(event.key==='Enter')searchFoods()">
+      <button onclick="searchFoods()">SEARCH</button>
     </div>
+
+    <div id="foodSearchStatus" class="small" style="margin-top:8px">Search for a food to begin.</div>
+    <div id="foodSearchResults" class="search-results"></div>
+
+    <div id="foodSelectedPanel" style="display:none;margin-top:14px">
+      <div class="card">
+        <div class="row"><div><div class="label">Selected food</div><div class="value" style="font-size:18px" id="selectedFoodName">Food</div><div class="goal" id="selectedFoodBasis"></div></div><button class="secondary" onclick="clearSelectedFood()">Change</button></div>
+        <div class="serving-box" style="margin-top:12px">
+          <div><div class="label">Amount (g)</div><input id="selectedFoodGrams" type="number" min="1" step="1" value="100"></div>
+          <div><div class="label">Meal</div><select id="foodMeal"><option value="0">Breakfast</option><option value="1">Lunch</option><option value="2">Post-workout</option><option value="3">Dinner</option></select></div>
+        </div>
+        <div class="goal" style="margin-top:8px">Estimated for this amount: <b id="selectedFoodMacros">0 kcal • 0 g protein</b></div>
+        <button style="width:100%;margin-top:10px" onclick="addSelectedFood()">ADD TO MEAL</button>
+      </div>
+    </div>
+
+    <div class="food-source">Food data powered by Open Food Facts. Packaged-product data can vary by brand and serving.</div>
   </div>
+</div>
 </div>
 <div id="mealReplaceModal" class="modal-backdrop" style="display:none" onclick="closeMealReplace(event)">
   <div class="sheet" onclick="event.stopPropagation()">
@@ -176,6 +210,7 @@ nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 
     <div id="mealReplaceChoices"></div>
   </div>
 </div>
+<script src="https://unpkg.com/@zxing/browser@0.2.1"></script>
 <script>
 const STORE='fitness-v1-real';
 let state=JSON.parse(localStorage.getItem(STORE)||'null')||{
@@ -246,7 +281,7 @@ function renderAll(){
  pWeight.value=state.weight;pGoalWeight.value=state.goalWeight;pCal.value=state.calGoal;pProtein.value=state.proteinGoal;pSteps.value=state.stepsGoal;pWorkouts.value=state.workoutsGoal;pRuns.value=state.runsGoal;pSleep.value=state.sleepGoal;
  workoutSub.textContent=routines[state.routine].title;routineTitle.textContent=routines[state.routine].title;routineMeta.textContent=routines[state.routine].ex.length+' exercises';workoutPill.textContent=state.workoutStatus[state.routine];
  document.querySelectorAll('#workout .tabs button').forEach(b=>b.classList.add('secondary'));document.getElementById('routine'+state.routine).classList.remove('secondary');
- renderExercises();renderMeals();renderNutrition();renderMeals();
+ renderExercises();renderMeals();renderNutrition();renderMeals();renderNutrition();renderMeals();
 }
 function showScreen(id,btn){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');if(btn){document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}}
 function editWeight(){let v=prompt('Today’s weight (kg)',state.weight);if(v!==null&&!isNaN(v)){state.weight=Number(v);persist()}}
@@ -339,12 +374,159 @@ function saveFoodModal(){
   state.meals[mi].items.push({name,cal,protein});
   closeFoodModal();persist();
 }
-function quickFood(name,cal,protein){openFoodModal(-1,{name,cal,protein})}
+
+let selectedFood=null;
+function quickFood(name,cal,protein){
+  const mi=0;
+  state.meals[mi].items.push({name,cal,protein});
+  persist();
+}
+function openFoodModal(mi){
+  window.addFoodMeal = mi>=0?mi:0;
+  document.getElementById('foodModal').style.display='flex';
+  document.getElementById('foodSearch').value='';
+  document.getElementById('foodSearchResults').innerHTML='';
+  document.getElementById('foodSearchStatus').textContent='Search for a food to begin.';
+  document.getElementById('foodSelectedPanel').style.display='none';
+  selectedFood=null;
+}
+function closeFoodModal(evt){
+  const m=document.getElementById('foodModal');
+  if(!evt||evt.target===m)m.style.display='none';
+}
+function clearSelectedFood(){selectedFood=null;document.getElementById('foodSelectedPanel').style.display='none';}
+function foodValue(n, fallback=0){const v=Number(n);return Number.isFinite(v)?v:fallback;}
+async function searchFoods(){
+  const q=document.getElementById('foodSearch').value.trim();
+  const status=document.getElementById('foodSearchStatus'),results=document.getElementById('foodSearchResults');
+  if(!q){status.textContent='Type a food to search.';return;}
+  status.textContent='Searching…';results.innerHTML='';
+  try{
+    const url='https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(q)+'&search_simple=1&action=process&json=1&page_size=12';
+    const res=await fetch(url,{headers:{'Accept':'application/json'}});
+    if(!res.ok)throw new Error('Search failed');
+    const data=await res.json();
+    const products=(data.products||[]).filter(p=>p.product_name && (p.nutriments?.['energy-kcal_100g']!=null || p.nutriments?.energy_kcal_100g!=null || p.nutriments?.['energy-kj_100g']!=null));
+    if(!products.length){status.textContent='No good matches found. Try a brand name or a simpler search.';return;}
+    status.textContent=`${products.length} results`;
+    results.innerHTML=products.map((p,i)=>{
+      const n=p.nutriments||{},kcal=foodValue(n['energy-kcal_100g'],foodValue(n.energy_kcal_100g,0)),prot=foodValue(n.proteins_100g,0);
+      const brand=p.brands?` • ${p.brands}`:'';
+      return `<div class="food-result" onclick="selectFoodResult(${i})"><b>${escapeHtml(p.product_name)}${escapeHtml(brand)}</b><span>${Math.round(kcal)} kcal • ${prot.toFixed(1)} g protein per 100 g</span></div>`;
+    }).join('');
+    window.foodSearchProducts=products;
+  }catch(e){
+    status.textContent='Food search is unavailable right now. You can use Custom Food below.';
+    results.innerHTML='<button class="secondary" onclick="openCustomFood()">＋ Enter Custom Food</button>';
+  }
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function selectFoodResult(i){
+  const p=window.foodSearchProducts?.[i];if(!p)return;
+  const n=p.nutriments||{};
+  const kcal=foodValue(n['energy-kcal_100g'],foodValue(n.energy_kcal_100g,0));
+  const protein=foodValue(n.proteins_100g,0);
+  selectedFood={name:p.product_name+(p.brands?` (${p.brands})`:''),kcal100:kcal,protein100:protein};
+  document.getElementById('selectedFoodName').textContent=selectedFood.name;
+  document.getElementById('selectedFoodBasis').textContent=`${Math.round(kcal)} kcal • ${protein.toFixed(1)} g protein per 100 g`;
+  document.getElementById('selectedFoodGrams').value=100;
+  document.getElementById('foodMeal').value=String(window.addFoodMeal||0);
+  document.getElementById('foodSelectedPanel').style.display='block';
+  updateSelectedMacros();
+}
+function updateSelectedMacros(){
+  if(!selectedFood)return;
+  const g=Math.max(1,Number(document.getElementById('selectedFoodGrams').value)||100);
+  const kcal=selectedFood.kcal100*g/100,protein=selectedFood.protein100*g/100;
+  document.getElementById('selectedFoodMacros').textContent=`${Math.round(kcal)} kcal • ${protein.toFixed(1)} g protein`;
+}
+function addSelectedFood(){
+  if(!selectedFood)return;
+  const g=Math.max(1,Number(document.getElementById('selectedFoodGrams').value)||100);
+  const mi=Number(document.getElementById('foodMeal').value);
+  state.meals[mi].items.push({name:selectedFood.name+` • ${Math.round(g)}g`,cal:Math.round(selectedFood.kcal100*g/100),protein:Math.round(selectedFood.protein100*g/100*10)/10});
+  closeFoodModal();persist();
+}
+function openCustomFood(){
+  const name=prompt('Food name','Custom Food');if(!name)return;
+  const cal=Number(prompt('Calories per 100 g',100));if(!Number.isFinite(cal))return;
+  const protein=Number(prompt('Protein per 100 g',10));if(!Number.isFinite(protein))return;
+  const grams=Number(prompt('Amount (g)',100));if(!Number.isFinite(grams)||grams<=0)return;
+  const mi=Number(window.addFoodMeal||0);
+  state.meals[mi].items.push({name:`${name} • ${Math.round(grams)}g`,cal:Math.round(cal*grams/100),protein:Math.round(protein*grams/100*10)/10});
+  closeFoodModal();persist();
+}
+document.addEventListener('input',e=>{if(e.target && e.target.id==='selectedFoodGrams')updateSelectedMacros();});
+
+let scannerControls=null;
+let scannerStream=null;
+let scannerActive=false;
+async function openScanner(){
+  document.getElementById('scannerModal').style.display='flex';
+  document.getElementById('scanStatus').textContent='Starting camera…';
+  try{
+    if(!window.ZXingBrowser){throw new Error('Scanner library unavailable');}
+    scannerControls=new ZXingBrowser.BrowserMultiFormatReader();
+    const devices=await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
+    if(!devices.length)throw new Error('No camera found');
+    const back=devices.find(d=>/back|rear|environment/i.test(d.label))||devices[devices.length-1];
+    scannerControls.decodeFromVideoDevice(back.deviceId,'scannerVideo',(result)=>{
+      if(result && !scannerActive){return;}
+      if(result){
+        scannerActive=true;
+        const code=result.getText();
+        document.getElementById('scanStatus').textContent='Barcode found: '+code;
+        stopScanner(false);
+        lookupBarcode(code);
+      }
+    }).then(controls=>{scannerStream=controls;scannerActive=true;document.getElementById('scanStatus').textContent='Scanning…';})
+      .catch(err=>{console.error(err);document.getElementById('scanStatus').textContent='Camera could not start. Try Enter Barcode.';});
+  }catch(e){
+    document.getElementById('scanStatus').textContent='Camera scanning is unavailable here. Try Enter Barcode.';
+  }
+}
+function stopScanner(hide=true){
+  try{scannerStream?.stop();}catch(e){}
+  try{scannerControls?.reset();}catch(e){}
+  scannerStream=null;scannerControls=null;
+  const v=document.getElementById('scannerVideo');
+  if(v?.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;}
+  if(hide)document.getElementById('scannerModal').style.display='none';
+  document.getElementById('scanStatus').textContent='Ready';
+}
+function closeScanner(evt){const m=document.getElementById('scannerModal');if(!evt||evt.target===m)stopScanner(true)}
+function manualBarcode(){
+  const code=prompt('Enter barcode number');
+  if(code)lookupBarcode(code.replace(/\D/g,''));
+}
+async function lookupBarcode(code){
+  if(!/^\d{6,14}$/.test(code)){alert('That does not look like a valid barcode.');return;}
+  try{
+    const url='https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'?fields=code,product_name,brands,nutriments,serving_size';
+    const res=await fetch(url,{headers:{'Accept':'application/json'}});
+    if(!res.ok)throw new Error('Lookup failed');
+    const data=await res.json();
+    if(data.status!==1 || !data.product){alert('Product not found in Open Food Facts. You can add it as a Custom Food.');return;}
+    const n=data.product.nutriments||{};
+    const kcal=Number(n['energy-kcal_100g'] ?? n['energy_kcal_100g'] ?? 0);
+    const protein=Number(n['proteins_100g'] ?? 0);
+    selectedFood={name:(data.product.product_name||'Scanned Product')+(data.product.brands?' ('+data.product.brands+')':''),kcal100:kcal,protein100:protein};
+    document.getElementById('selectedFoodName').textContent=selectedFood.name;
+    document.getElementById('selectedFoodBasis').textContent=`${Math.round(kcal)} kcal • ${protein.toFixed(1)} g protein per 100 g`;
+    document.getElementById('selectedFoodGrams').value=100;
+    document.getElementById('foodMeal').value=String(window.addFoodMeal||0);
+    document.getElementById('foodSelectedPanel').style.display='block';
+    updateSelectedMacros();
+    document.getElementById('foodModal').style.display='flex';
+  }catch(e){
+    alert('Could not look up that barcode right now. You can enter the product as Custom Food.');
+  }
+}
 function renderMeals(){
   const el=document.getElementById('mealList'); if(!el)return;
   el.innerHTML=state.meals.map((m,mi)=>{const t=mealTotals(m);return `<div class="card">
     <div class="row"><div><div class="label">${m.name}</div><div class="meal-total">${Math.round(t.cal)} kcal • ${Math.round(t.protein)} g protein</div></div><button class="secondary" onclick="replaceMeal(${mi})">↻</button></div>
-    ${(m.items||[]).map((x,ii)=>`<div class="food-row"><div><div class="food-name">${x.name}</div><div class="food-macro">${x.cal} kcal • ${x.protein} g protein</div></div><button class="secondary mini" onclick="removeMealItem(${mi},${ii})">−</button></div>`).join('')}
+    ${(m.items||[]).map((x,ii)=>`<div class="food-row"><div><div class="food-name">${escapeHtml(x.name)}</div><div class="food-macro">${x.cal} kcal • ${x.protein} g protein</div></div><button class="secondary mini" onclick="removeMealItem(${mi},${ii})">−</button></div>`).join('')}
     <div class="meal-actions"><button class="secondary mini" onclick="openFoodModal(${mi})">＋ Item</button><button class="secondary mini" onclick="replaceMeal(${mi})">Replace Meal</button></div>
   </div>`}).join('');
 }
