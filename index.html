@@ -29,8 +29,8 @@ textarea{width:100%;min-height:100px}
 .notice{background:#182218;color:#cdeaa6;border-radius:12px;padding:11px;font-size:12px;margin-top:12px}
 nav{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:center;gap:2px;padding:9px 7px calc(9px + env(safe-area-inset-bottom));background:rgba(11,13,12,.97);border-top:1px solid var(--line)}
 nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 10px}nav button.active{color:var(--accent)}
-.small{font-size:11px;color:var(--muted)}.iconbtn{width:40px;height:40px;padding:0;border-radius:12px;font-size:20px;display:inline-flex;align-items:center;justify-content:center}.iconbtn.skip{background:var(--card2);color:var(--text);border:1px solid var(--line)}.iconbtn.replace{background:var(--card2);color:var(--accent);border:1px solid var(--line)}.history{background:#121613;border-radius:10px;padding:8px;margin-top:8px;font-size:12px;color:#c2cbc5}.progression{color:#cdeaa6;font-weight:700}.photo-box{height:160px;border:1px dashed #3c443f;border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
-</style>
+.small{font-size:11px;color:var(--muted)}.history{background:#121613;border-radius:10px;padding:8px;margin-top:8px;font-size:12px;color:#c2cbc5}.progression{color:#cdeaa6;font-weight:700}.photo-box{height:160px;border:1px dashed #3c443f;border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-end;z-index:30}.modal-backdrop.open{display:flex}.sheet{width:100%;max-width:520px;margin:0 auto;background:#171b18;border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:18px 16px 26px;box-shadow:0 -12px 36px rgba(0,0,0,.35)}.sheet h2{font-size:20px;margin:0}.choice{padding:8px 0}.choice button{width:100%;text-align:left;background:var(--card2);color:var(--text);border:1px solid var(--line)}</style>
 </head>
 <body>
 <div class="app">
@@ -120,7 +120,7 @@ nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 
 <button onclick="showScreen('profile',this)">👤<br>Profile</button>
 </nav>
 
-<script>
+<div id="replaceBackdrop" class="modal-backdrop" onclick="closeReplace(event)"><div class="sheet" onclick="event.stopPropagation()"><div class="row"><div><h2 id="replaceTitle">Replace Exercise</h2><div class="sub">Choose a same-movement alternative</div></div><button class="secondary" onclick="closeReplace()">✕</button></div><div id="replaceChoices"></div><div class="actions" style="margin-top:12px"><button class="secondary" onclick="customReplace()">＋ Custom exercise</button><button class="secondary" onclick="makeReplacementDefault()">★ Make default</button></div></div></div><script>
 const STORE='fitness-v1-real';
 let state=JSON.parse(localStorage.getItem(STORE)||'null')||{
  weight:83,goalWeight:75,calGoal:2300,proteinGoal:150,stepsGoal:10000,workoutsGoal:3,runsGoal:2,sleepGoal:7,
@@ -280,34 +280,16 @@ function logSet(i,s,button){
   startWorkoutTimer();
   startRest(90);
 }
-function skipExercise(i){
-  const key=state.routine+'-'+i;
-  state.sets[key]={...(state.sets[key]||{}),status:'Skipped'};
-  persist();
-}
 function replaceExercise(i){
-  const key=state.routine+'-'+i;
-  const original=routines[state.routine].ex[i][0];
-  const current=state.sets[key]?.name||original;
-  const opts=alt[current]||[];
-  let msg=`Replace ${current} with:
-
-`;
-  opts.forEach((o,n)=>msg+=`${n+1}. ${o}
-`);
-  msg+='
-R. Enter another replacement';
-  const c=prompt(msg);
-  if(!c)return;
-  let replacement=null;
-  const idx=parseInt(c,10)-1;
-  if(Number.isInteger(idx)&&opts[idx])replacement=opts[idx];
-  if(c.toUpperCase()==='R')replacement=prompt('Replacement exercise name','');
-  if(replacement){
-    state.sets[key]={...(state.sets[key]||{}),name:replacement,status:'Replaced for today'};
-    persist();
-  }
+  window.replaceIndex=i; const key=state.routine+'-'+i; const original=routines[state.routine].ex[i][0]; const current=state.sets[key]?.name||original; const opts=alt[current]||[];
+  replaceTitle.textContent='Replace '+current;
+  replaceChoices.innerHTML=opts.map(o=>`<div class="choice"><button onclick="chooseReplacement(${JSON.stringify(o)})">${o}</button></div>`).join('')||'<div class="small" style="padding:12px 0">No preset alternatives.</div>';
+  replaceBackdrop.classList.add('open');
 }
+function chooseReplacement(rep){const i=window.replaceIndex,key=state.routine+'-'+i;state.sets[key]={...(state.sets[key]||{}),name:rep,status:'Replaced for today'};closeReplace();persist()}
+function customReplace(){const rep=prompt('Replacement exercise name','');if(rep)chooseReplacement(rep)}
+function makeReplacementDefault(){const i=window.replaceIndex,key=state.routine+'-'+i,original=routines[state.routine].ex[i][0],current=state.sets[key]?.name;if(!current||current===original)return alert('Choose a replacement first.');state.defaultReplacements=state.defaultReplacements||{};state.defaultReplacements[original]=current;closeReplace();persist();alert(current+' is now the default replacement for future workouts.')}
+function closeReplace(evt){if(!evt||evt.target===replaceBackdrop)replaceBackdrop.classList.remove('open')}
 function effectiveName(r,i){
   const base=routines[r].ex[i][0];
   return state.sets?.[r+'-'+i]?.name||state.defaultReplacements?.[base]||base;
@@ -340,7 +322,7 @@ function renderExercises(){
     }
     if(allTop)prog='<div class="progression" style="margin-top:8px">🎯 Increase weight next time</div>';
     const warm=e[3]?`<div class="actions"><button class="secondary" onclick="toggleWarm(${i})">🔥 Warm-up ${x.warm?'✓':''}</button></div>`:'';
-    return `<div class="card"><div class="row"><div><div class="exercise-title">${i+1}. ${name}</div><div class="sub">${e[1]} working sets • ${e[2]} reps • ${status}</div><div class="small">Previous performance shown below each set</div></div><div style="display:flex;gap:6px"><button class="iconbtn replace" title="Replace exercise" onclick="replaceExercise(${i})">↻</button><button class="iconbtn skip" title="Skip exercise" onclick="skipExercise(${i})">→</button></div></div>${warm}<div style="margin-top:9px">${rows}</div>${prog}</div>`;
+    return `<div class="card"><div class="row"><div><div class="exercise-title">${i+1}. ${name}</div><div class="sub">${e[1]} working sets • ${e[2]} reps • ${status}</div><div class="small">Previous performance shown below each set</div></div><button class="secondary" onclick="replaceExercise(${i})">⋯</button></div>${warm}<div style="margin-top:9px">${rows}</div>${prog}</div>`;
   }).join('');
   const total=arr.length;
   let completed=0;
