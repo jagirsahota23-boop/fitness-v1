@@ -29,8 +29,16 @@ textarea{width:100%;min-height:100px}
 .notice{background:#182218;color:#cdeaa6;border-radius:12px;padding:11px;font-size:12px;margin-top:12px}
 nav{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:center;gap:2px;padding:9px 7px calc(9px + env(safe-area-inset-bottom));background:rgba(11,13,12,.97);border-top:1px solid var(--line)}
 nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 10px}nav button.active{color:var(--accent)}
-.small{font-size:11px;color:var(--muted)}.exercise-actions{display:flex;gap:7px}.exercise-icon{width:40px;height:40px;padding:0;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:20px;background:var(--card2);border:1px solid var(--line)}.exercise-icon.replace{color:var(--accent)}.exercise-icon.skip{color:var(--text)}.photo-box{height:160px;border:1px dashed #3c443f;border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:50;display:flex;align-items:flex-end}.sheet{width:100%;max-width:520px;margin:auto 0 0;background:#171b18;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px 16px 25px}.choice{margin-top:8px}.choice button{width:100%;text-align:left;background:var(--card2);color:var(--text);border:1px solid var(--line);padding:13px;border-radius:12px}.meal-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.food-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}.food-row:last-child{border-bottom:0}.food-name{font-size:13px}.food-macro{font-size:11px;color:var(--muted)}.mini{padding:7px 9px;font-size:11px}.meal-total{font-size:12px;color:#cdeaa6;margin-top:9px}.nutrition-sheet .choice button{display:flex;justify-content:space-between;align-items:center}.qty{display:grid;grid-template-columns:1fr 1fr;gap:8px}.qty input{margin:0}
+.small{font-size:11px;color:var(--muted)}.photo-box{height:160px;border:1px dashed #3c443f;border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:50;display:flex;align-items:flex-end}
+.sheet{width:100%;max-width:520px;margin:0 auto;background:#171b18;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px 16px 26px;max-height:85vh;overflow:auto}
+.food-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
+.food-name{font-size:13px}.food-macro{font-size:11px;color:var(--muted)}.mini{padding:7px 9px;font-size:11px}
+.meal-total{font-size:12px;color:#cdeaa6;margin-top:5px}.meal-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.choice{margin-top:8px}.choice button{width:100%;text-align:left;background:var(--card2);color:var(--text);border:1px solid var(--line);padding:13px;border-radius:12px}
+.qty{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style>
 </head>
 <body>
 <div class="app">
@@ -83,24 +91,29 @@ nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 
     <div><h1>Nutrition</h1><div class="sub">Your meals • 2,300 kcal • 150 g protein</div></div>
     <button class="icon" onclick="openFoodModal(-1)">＋</button>
   </div>
-
   <div class="grid">
-    <div class="card"><div class="label">Calories</div><div class="value" id="nCal">0</div><div class="goal">of 2,300 kcal</div><div class="progress"><div class="bar" id="nCalBar"></div></div></div>
-    <div class="card"><div class="label">Protein</div><div class="value" id="nProtein">0 g</div><div class="goal">of 150 g</div><div class="progress"><div class="bar" id="nProteinBar"></div></div></div>
-  </div>
-
-  <div id="mealList" class="list" style="margin-top:10px"></div>
-
-  <div class="card" style="margin-top:10px">
-    <div class="row"><div><div class="label">Quick Add</div><div class="goal">Saved foods you use often</div></div><button class="secondary" onclick="openFoodModal(-1)">＋ Add Food</button></div>
-    <div class="actions">
-      <button class="secondary mini" onclick="quickFood('Lean Fit Whey',120,23)">Whey • 120 / 23g</button>
-      <button class="secondary mini" onclick="quickFood('3 Whole Eggs',210,18)">Eggs • 210 / 18g</button>
-      <button class="secondary mini" onclick="quickFood('Chicken Breast 180g',297,56)">Chicken • 297 / 56g</button>
+    <div class="card">
+      <div class="label">Calories</div><div class="value" id="nCal">0</div>
+      <div class="goal">of <span id="nCalGoal">2300</span> kcal</div>
+      <div class="progress"><div class="bar" id="nCalBar"></div></div>
+    </div>
+    <div class="card">
+      <div class="label">Protein</div><div class="value" id="nProtein">0 g</div>
+      <div class="goal">of <span id="nProteinGoal">150</span> g</div>
+      <div class="progress"><div class="bar" id="nProteinBar"></div></div>
     </div>
   </div>
-
-  <div class="notice">Every meal supports <b>− item</b>, <b>＋ item</b>, and <b>Replace Meal</b>. Replace can be for today; your saved meal structure can be updated later.</div>
+  <div id="mealList" class="list" style="margin-top:10px"></div>
+  <div class="card" style="margin-top:10px">
+    <div class="label">Quick Add</div>
+    <div class="goal">Common foods for your routine</div>
+    <div class="actions">
+      <button class="secondary" onclick="quickFood('Lean Fit Whey',120,23)">Whey • 120 / 23g</button>
+      <button class="secondary" onclick="quickFood('3 Whole Eggs',210,18)">Eggs • 210 / 18g</button>
+      <button class="secondary" onclick="quickFood('Chicken Breast 180g',297,56)">Chicken • 297 / 56g</button>
+    </div>
+    <button style="margin-top:10px" onclick="openFoodModal(-1)">＋ ADD FOOD</button>
+  </div>
 </section>
 
 <section id="progress" class="screen">
@@ -136,39 +149,31 @@ nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 
 </nav>
 
 
-<div id="replaceModal" class="modal-backdrop" onclick="closeReplaceModal(event)" style="display:none">
+<div id="foodModal" class="modal-backdrop" style="display:none" onclick="closeFoodModal(event)">
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="row">
-      <div><h2 id="replaceHeading">Replace Exercise</h2><div class="sub">Choose a similar movement.</div></div>
-      <button class="secondary" onclick="closeReplaceModal()">✕</button>
+      <div><h2 id="foodModalTitle">Add Food</h2><div class="sub">Add calories and protein to a meal.</div></div>
+      <button class="secondary" onclick="closeFoodModal()">✕</button>
     </div>
-    <div id="replaceOptions"></div>
-    <div class="actions" style="margin-top:12px"><button class="secondary" onclick="customReplace()">＋ Custom exercise</button></div>
-  </div>
-</div>
-
-<div id="foodModal" class="modal-backdrop nutrition-sheet" style="display:none" onclick="closeFoodModal(event)">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="row"><div><h2 id="foodModalTitle">Add Food</h2><div class="sub">Add it to one meal and track calories + protein.</div></div><button class="secondary" onclick="closeFoodModal()">✕</button></div>
     <div style="margin-top:12px">
-      <div class="label">Food</div><input id="foodName" placeholder="Chicken breast">
-      <div class="qty"><div><div class="label">Calories</div><input id="foodCal" type="number" placeholder="200"></div><div><div class="label">Protein (g)</div><input id="foodProtein" type="number" placeholder="30"></div></div>
-      <div class="label">Meal</div><select id="foodMeal"><option value="0">Breakfast</option><option value="1">Lunch</option><option value="2">Post-workout</option><option value="3">Dinner</option></select>
+      <div class="label">Food name</div><input id="foodName" placeholder="Chicken breast">
+      <div class="qty">
+        <div><div class="label">Calories</div><input id="foodCal" type="number" placeholder="200"></div>
+        <div><div class="label">Protein (g)</div><input id="foodProtein" type="number" placeholder="30"></div>
+      </div>
+      <div class="label">Meal</div>
+      <select id="foodMeal"><option value="0">Breakfast</option><option value="1">Lunch</option><option value="2">Post-workout</option><option value="3">Dinner</option></select>
       <button style="width:100%;margin-top:7px" onclick="saveFoodModal()">ADD FOOD</button>
     </div>
   </div>
 </div>
-
-<div id="replaceMealModal" class="modal-backdrop nutrition-sheet" style="display:none" onclick="closeReplaceMeal(event)">
+<div id="mealReplaceModal" class="modal-backdrop" style="display:none" onclick="closeMealReplace(event)">
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="row">
-      <div><h2 id="replaceMealTitle">Replace Meal</h2><div class="sub">Choose a meal for today.</div></div>
-      <button class="secondary" onclick="closeReplaceMeal()">✕</button>
+      <div><h2 id="mealReplaceTitle">Replace Meal</h2><div class="sub">Choose a meal for today.</div></div>
+      <button class="secondary" onclick="closeMealReplace()">✕</button>
     </div>
-    <div id="replaceMealChoices"></div>
-    <div class="actions" style="margin-top:12px">
-      <button class="secondary" onclick="customMealReplace()">＋ Custom meal</button>
-    </div>
+    <div id="mealReplaceChoices"></div>
   </div>
 </div>
 <script>
@@ -229,10 +234,6 @@ const alt={
 function persist(){localStorage.setItem(STORE,JSON.stringify(state));renderAll()}
 function pct(a,b){return Math.max(0,Math.min(100,b?Math.round(a/b*100):0))}
 function renderAll(){
-  if(!state || typeof state!=='object') return;
-  state.calGoal=Number(state.calGoal)||2300;
-  state.proteinGoal=Number(state.proteinGoal)||150;
-  state.stepsGoal=Number(state.stepsGoal)||10000;
  todayDate.textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
  weightVal.textContent=state.weight.toFixed(1)+' kg';weightGoal.textContent=state.goalWeight;
  calVal.textContent=state.cal;calGoal.textContent=state.calGoal;proteinVal.textContent=state.protein+' g';proteinGoal.textContent=state.proteinGoal;
@@ -245,7 +246,7 @@ function renderAll(){
  pWeight.value=state.weight;pGoalWeight.value=state.goalWeight;pCal.value=state.calGoal;pProtein.value=state.proteinGoal;pSteps.value=state.stepsGoal;pWorkouts.value=state.workoutsGoal;pRuns.value=state.runsGoal;pSleep.value=state.sleepGoal;
  workoutSub.textContent=routines[state.routine].title;routineTitle.textContent=routines[state.routine].title;routineMeta.textContent=routines[state.routine].ex.length+' exercises';workoutPill.textContent=state.workoutStatus[state.routine];
  document.querySelectorAll('#workout .tabs button').forEach(b=>b.classList.add('secondary'));document.getElementById('routine'+state.routine).classList.remove('secondary');
- renderExercises();renderMeals();renderNutrition();
+ renderExercises();renderMeals();renderNutrition();renderMeals();
 }
 function showScreen(id,btn){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');if(btn){document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}}
 function editWeight(){let v=prompt('Today’s weight (kg)',state.weight);if(v!==null&&!isNaN(v)){state.weight=Number(v);persist()}}
@@ -260,88 +261,48 @@ function finishRoutine(){if(state.workoutStatus[state.routine]!=='In progress')r
 function resetWorkout(){state.workoutStatus[state.routine]='Not started';state.sets={};persist()}
 function logSet(i,s,el){const key=state.routine+'-'+i;const w=el.parentElement.querySelector('.weight').value;const r=el.parentElement.querySelector('.reps').value;if(!state.sets[key])state.sets[key]={};state.sets[key][s]={weight:w,reps:r,done:!state.sets[key][s]?.done};if(state.workoutStatus[state.routine]==='Not started')state.workoutStatus[state.routine]='In progress';persist()}
 function toggleWarm(i){const key=state.routine+'-'+i;if(!state.sets[key])state.sets[key]={};state.sets[key].warm=!state.sets[key].warm;persist()}
-
+function menuExercise(i){
+ const original=routines[state.routine].ex[i][0],key=state.routine+'-'+i,current=state.sets[key]?.name||original;
+ let opts=alt[current]||[];let msg='Replace '+current+' with:\\n\\n';opts.forEach((o,n)=>msg+=(n+1)+'. '+o+'\\n');msg+='\\nR. Enter another\\nS. Skip';
+ let c=prompt(msg);if(!c)return;if(c.toUpperCase()==='S'){state.sets[key]={...(state.sets[key]||{}),status:'Skipped'};persist();return}
+ let idx=parseInt(c,10)-1;let rep=idx>=0&&idx<opts.length?opts[idx]:null;if(c.toUpperCase()==='R'||!rep)rep=prompt('Replacement exercise name','');
+ if(rep){state.sets[key]={...(state.sets[key]||{}),name:rep,status:'Replaced for today'};persist()}
+}
 function renderExercises(){
  exerciseList.innerHTML=routines[state.routine].ex.map((e,i)=>{const key=state.routine+'-'+i,x=state.sets[key]||{},name=x.name||e[0],status=x.status||'Not started';
   const warm=e[3]?`<div class="actions"><button class="secondary" onclick="toggleWarm(${i})">🔥 Warm-up ${x.warm?'✓':''}</button></div>`:'';
   let rows='';for(let s=0;s<e[1];s++){let q=x[s]||{};rows+=`<div class="setrow"><div class="setnum">Set ${s+1}</div><input class="weight" type="number" step="0.5" placeholder="kg" value="${q.weight||''}"><input class="reps" type="number" placeholder="reps" value="${q.reps||''}"><button class="check ${q.done?'':'secondary'}" onclick="logSet(${i},${s},this)">${q.done?'✓':'OK'}</button></div>`}
-  return `<div class="card"><div class="row"><div><div class="exercise-title">${i+1}. ${name}</div><div class="sub">${e[1]} working sets • ${e[2]} reps • ${status}</div><div class="small">Tap ⋯ for smart alternatives or skip</div></div><div class="exercise-actions"><button class="exercise-icon replace" title="Replace exercise" onclick="openReplaceModal(${i})">↻</button><button class="exercise-icon skip" title="Skip exercise" onclick="skipExercise(${i})">→</button></div></div>${warm}<div style="margin-top:9px">${rows}</div></div>`;
+  return `<div class="card"><div class="row"><div><div class="exercise-title">${i+1}. ${name}</div><div class="sub">${e[1]} working sets • ${e[2]} reps • ${status}</div><div class="small">Tap ⋯ for smart alternatives or skip</div></div><button class="secondary" onclick="menuExercise(${i})">⋯</button></div>${warm}<div style="margin-top:9px">${rows}</div></div>`;
  }).join('')
 }
-
-let replacingExerciseIndex=null;
-function skipExercise(i){
-  const key=state.routine+'-'+i;
-  state.sets[key]={...(state.sets[key]||{}),status:'Skipped'};
-  persist();
-}
-function openReplaceModal(i){
-  replacingExerciseIndex=i;
-  const key=state.routine+'-'+i;
-  const current=state.sets[key]?.name||routines[state.routine].ex[i][0];
-  const opts=alt[current]||[];
-  replaceHeading.textContent='Replace '+current;
-  replaceOptions.innerHTML=opts.map(o=>`<div class="choice"><button onclick="chooseReplacement(${JSON.stringify(o)})">${o}</button></div>`).join('');
-  replaceModal.style.display='flex';
-}
-function chooseReplacement(rep){
-  const i=replacingExerciseIndex,key=state.routine+'-'+i;
-  state.sets[key]={...(state.sets[key]||{}),name:rep,status:'Replaced for today'};
-  closeReplaceModal();persist();
-}
-function customReplace(){
-  const rep=prompt('Replacement exercise name','');
-  if(rep)chooseReplacement(rep);
-}
-function closeReplaceModal(evt){
-  if(!evt || evt.target===replaceModal)replaceModal.style.display='none';
-}
-
-const meals=[
- ['Breakfast',['3 whole eggs','Overnight oats','Whey protein','Granola','Peanut butter','Almonds']],
- ['Lunch',['180 g chicken breast','Corn','Onion','Greek yogurt','Salsa','Zero-sugar 7UP']],
- ['Post-workout',['Lean Fit Whey']],
- ['Dinner',['Grilled chicken wings','Seasoning']]
-];
 const mealTemplates=[
  {name:'Breakfast',items:[
-  {name:'3 whole eggs',cal:210,protein:18},
-  {name:'Overnight oats',cal:300,protein:18},
-  {name:'Whey protein',cal:120,protein:23},
-  {name:'Granola',cal:120,protein:3},
-  {name:'Peanut butter',cal:95,protein:4},
-  {name:'Almonds',cal:80,protein:3}
+  {name:'3 whole eggs',cal:210,protein:18},{name:'Overnight oats',cal:300,protein:18},
+  {name:'Whey protein',cal:120,protein:23},{name:'Granola',cal:120,protein:3},
+  {name:'Peanut butter',cal:95,protein:4},{name:'Almonds',cal:80,protein:3}
  ]},
  {name:'Lunch',items:[
-  {name:'Chicken breast 180g',cal:297,protein:56},
-  {name:'Corn',cal:80,protein:3},
-  {name:'Onion',cal:30,protein:1},
-  {name:'Greek yogurt',cal:100,protein:10},
-  {name:'Salsa',cal:25,protein:1},
-  {name:'Zero-sugar 7UP',cal:0,protein:0}
+  {name:'Chicken breast 180g',cal:297,protein:56},{name:'Corn',cal:80,protein:3},
+  {name:'Onion',cal:30,protein:1},{name:'Greek yogurt',cal:100,protein:10},
+  {name:'Salsa',cal:25,protein:1},{name:'Zero-sugar 7UP',cal:0,protein:0}
  ]},
  {name:'Post-workout',items:[{name:'Lean Fit Whey',cal:120,protein:23}]},
- {name:'Dinner',items:[{name:'Grilled chicken wings',cal:500,protein:45},{name:'Seasoning',cal:0,protein:0}]}
+ {name:'Dinner',items:[{name:'Grilled chicken wings',cal:500,protein:45}]}
 ];
-if(!Array.isArray(state.meals) || !state.meals.every(m=>m && typeof m==='object' && Array.isArray(m.items))){
+if(!Array.isArray(state.meals) || !state.meals.every(m=>m && Array.isArray(m.items))){
   state.meals=mealTemplates.map(m=>({name:m.name,items:m.items.map(x=>({...x}))}));
 }
-state.meals=state.meals.map(m=>({name:String(m.name||'Meal'),items:Array.isArray(m.items)?m.items:[]}));
-function mealTotals(meal){return meal.items.reduce((a,x)=>({cal:a.cal+(Number(x.cal)||0),protein:a.protein+(Number(x.protein)||0)}),{cal:0,protein:0})}
-function nutritionTotals(){return state.meals.reduce((a,m)=>{const t=mealTotals(m);return {cal:a.cal+t.cal,protein:a.protein+t.protein}},{cal:0,protein:0})}
-function addFoodToMeal(mi){
-  const name=prompt('Food name','Greek yogurt'); if(!name)return;
+function mealTotals(m){return (m.items||[]).reduce((a,x)=>({cal:a.cal+(Number(x.cal)||0),protein:a.protein+(Number(x.protein)||0)}),{cal:0,protein:0})}
+function nutritionTotals(){return state.meals.reduce((a,m)=>{const t=mealTotals(m);return{cal:a.cal+t.cal,protein:a.protein+t.protein}},{cal:0,protein:0})}
+function addMealItem(mi){
+  const name=prompt('Food name','Fruit'); if(!name)return;
   const cal=Number(prompt('Calories',100)); if(isNaN(cal))return;
-  const protein=Number(prompt('Protein (g)',10)); if(isNaN(protein))return;
+  const protein=Number(prompt('Protein (g)',2)); if(isNaN(protein))return;
   state.meals[mi].items.push({name,cal,protein});persist();
 }
-function removeFoodFromMeal(mi){
-  const items=state.meals[mi].items;if(!items.length)return;
-  const n=Number(prompt('Remove item #:\n\n'+items.map((x,i)=>`${i+1}. ${x.name}`).join('\n'),1))-1;
-  if(Number.isInteger(n)&&n>=0&&n<items.length){items.splice(n,1);persist();}
-}
-let replacingMealIndex=null;
-const mealOptions=[
+function removeMealItem(mi,ii){if(state.meals[mi]?.items?.[ii]!==undefined){state.meals[mi].items.splice(ii,1);persist()}}
+let replaceMealIndex=null;
+const mealReplaceOptions=[
  {name:'Greek Yogurt Oats',items:[{name:'Greek yogurt',cal:150,protein:15},{name:'Oats',cal:225,protein:8},{name:'Whey',cal:120,protein:23},{name:'Berries',cal:70,protein:1}]},
  {name:'Eggs + Toast',items:[{name:'3 whole eggs',cal:210,protein:18},{name:'Whole grain toast',cal:200,protein:8}]},
  {name:'Chicken Bowl',items:[{name:'Chicken breast 180g',cal:297,protein:56},{name:'Rice',cal:250,protein:5},{name:'Vegetables',cal:80,protein:4}]},
@@ -349,85 +310,53 @@ const mealOptions=[
  {name:'Steak + Potatoes',items:[{name:'Lean steak',cal:350,protein:45},{name:'Potatoes',cal:220,protein:5},{name:'Vegetables',cal:70,protein:3}]}
 ];
 function replaceMeal(mi){
-  replacingMealIndex=mi;
-  const modal=document.getElementById('replaceMealModal');
-  const title=document.getElementById('replaceMealTitle');
-  const choices=document.getElementById('replaceMealChoices');
+  replaceMealIndex=mi;
+  const title=document.getElementById('mealReplaceTitle'),choices=document.getElementById('mealReplaceChoices');
   title.textContent='Replace '+state.meals[mi].name;
-  choices.innerHTML=mealOptions.map((o,i)=>`<div class="choice"><button onclick="chooseMealReplacement(${i})">${o.name}<span class="small">${o.items.length} items</span></button></div>`).join('');
-  modal.style.display='flex';
+  choices.innerHTML=mealReplaceOptions.map((o,i)=>`<div class="choice"><button onclick="chooseMealReplacement(${i})">${o.name}<span class="small">${o.items.length} items</span></button></div>`).join('');
+  document.getElementById('mealReplaceModal').style.display='flex';
 }
 function chooseMealReplacement(i){
-  const opt=mealOptions[i]; if(!opt)return;
-  const mi=replacingMealIndex;
-  state.meals[mi]={name:opt.name,items:opt.items.map(x=>({...x})),replacedToday:true};
-  closeReplaceMeal();persist();
+  const o=mealReplaceOptions[i]; if(!o)return;
+  state.meals[replaceMealIndex]={name:o.name,items:o.items.map(x=>({...x})),replacedToday:true};
+  closeMealReplace();persist();
 }
-function customMealReplace(){
-  const mi=replacingMealIndex,name=prompt('New meal name',state.meals[mi].name);
-  if(!name)return;
-  state.meals[mi]={name,items:[],replacedToday:true};
-  closeReplaceMeal();persist();
-}
-function closeReplaceMeal(evt){
-  const modal=document.getElementById('replaceMealModal');
-  if(!evt||evt.target===modal)modal.style.display='none';
-}
-function quickFood(name,cal,protein){openFoodModal(-1,{name,cal,protein})}
+function closeMealReplace(evt){const m=document.getElementById('mealReplaceModal');if(!evt||evt.target===m)m.style.display='none'}
 let pendingFood=null;
 function openFoodModal(mi,preset=null){
   pendingFood={mi,preset};
-  const modal=document.getElementById('foodModal');
   document.getElementById('foodModalTitle').textContent=mi>=0?'Add food to '+state.meals[mi].name:'Add Food';
   document.getElementById('foodName').value=preset?.name||'';
   document.getElementById('foodCal').value=preset?.cal??'';
   document.getElementById('foodProtein').value=preset?.protein??'';
   document.getElementById('foodMeal').value=mi>=0?String(mi):'0';
-  modal.style.display='flex';
+  document.getElementById('foodModal').style.display='flex';
 }
-function closeFoodModal(evt){
-  const modal=document.getElementById('foodModal');
-  if(!evt||evt.target===modal)modal.style.display='none';
-}
+function closeFoodModal(evt){const m=document.getElementById('foodModal');if(!evt||evt.target===m)m.style.display='none'}
 function saveFoodModal(){
-  const name=document.getElementById('foodName').value.trim();
-  const cal=Number(document.getElementById('foodCal').value);
-  const protein=Number(document.getElementById('foodProtein').value);
-  const mi=Number(document.getElementById('foodMeal').value);
+  const name=document.getElementById('foodName').value.trim(),cal=Number(document.getElementById('foodCal').value),protein=Number(document.getElementById('foodProtein').value),mi=Number(document.getElementById('foodMeal').value);
   if(!name||isNaN(cal)||isNaN(protein)||!state.meals[mi])return alert('Enter food name, calories and protein.');
   state.meals[mi].items.push({name,cal,protein});
-  document.getElementById('foodModal').style.display='none';
-  persist();
+  closeFoodModal();persist();
 }
-function removeFoodByIndex(mi,ii){
-  if(state.meals[mi]?.items?.[ii]!==undefined){state.meals[mi].items.splice(ii,1);persist();}
-}
-function mealTotals(meal){
-  return (meal.items||[]).reduce((a,x)=>({cal:a.cal+(Number(x.cal)||0),protein:a.protein+(Number(x.protein)||0)}),{cal:0,protein:0});
-}
-function nutritionTotals(){
-  return state.meals.reduce((a,m)=>{const t=mealTotals(m);return{cal:a.cal+t.cal,protein:a.protein+t.protein}},{cal:0,protein:0});
-}
+function quickFood(name,cal,protein){openFoodModal(-1,{name,cal,protein})}
 function renderMeals(){
-  const el=document.getElementById('mealList');
-  if(!el)return;
-  el.innerHTML=state.meals.map((m,mi)=>{
-    const t=mealTotals(m);
-    return `<div class="card"><div class="row"><div><div class="label">${m.name}</div><div class="meal-total">${Math.round(t.cal)} kcal • ${Math.round(t.protein)} g protein</div></div><button class="secondary" onclick="replaceMeal(${mi})">↻</button></div>
-    ${(m.items||[]).map((x,ii)=>`<div class="food-row"><div><div class="food-name">${x.name}</div><div class="food-macro">${x.cal} kcal • ${x.protein} g protein</div></div><button class="secondary mini" onclick="removeFoodByIndex(${mi},${ii})">−</button></div>`).join('')}
-    <div class="meal-actions"><button class="secondary mini" onclick="openFoodModal(${mi})">＋ Item</button><button class="secondary mini" onclick="replaceMeal(${mi})">Replace Meal</button></div></div>`;
-  }).join('');
+  const el=document.getElementById('mealList'); if(!el)return;
+  el.innerHTML=state.meals.map((m,mi)=>{const t=mealTotals(m);return `<div class="card">
+    <div class="row"><div><div class="label">${m.name}</div><div class="meal-total">${Math.round(t.cal)} kcal • ${Math.round(t.protein)} g protein</div></div><button class="secondary" onclick="replaceMeal(${mi})">↻</button></div>
+    ${(m.items||[]).map((x,ii)=>`<div class="food-row"><div><div class="food-name">${x.name}</div><div class="food-macro">${x.cal} kcal • ${x.protein} g protein</div></div><button class="secondary mini" onclick="removeMealItem(${mi},${ii})">−</button></div>`).join('')}
+    <div class="meal-actions"><button class="secondary mini" onclick="openFoodModal(${mi})">＋ Item</button><button class="secondary mini" onclick="replaceMeal(${mi})">Replace Meal</button></div>
+  </div>`}).join('');
 }
 function renderNutrition(){
   const t=nutritionTotals();
   const c=document.getElementById('nCal'),p=document.getElementById('nProtein');
-  const cb=document.getElementById('nCalBar'),pb=document.getElementById('nProteinBar');
   if(c)c.textContent=Math.round(t.cal);
-  if(p)p.textContent=Math.round(t.protein);
+  if(p)p.textContent=Math.round(t.protein)+' g';
+  const cb=document.getElementById('nCalBar'),pb=document.getElementById('nProteinBar');
   if(cb)cb.style.width=Math.min(100,t.cal/state.calGoal*100)+'%';
   if(pb)pb.style.width=Math.min(100,t.protein/state.proteinGoal*100)+'%';
 }
-
 renderAll();
 </script>
 </body>
