@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d0c">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Fitness V1</title>
+<style>
+:root{--bg:#0b0d0c;--card:#151917;--card2:#1b201d;--text:#f5f7f6;--muted:#9aa39e;--accent:#b7ff3c;--line:#29302c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:520px;margin:auto;min-height:100vh;padding:18px 16px 92px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+h1{font-size:28px;margin:0}.sub{color:var(--muted);font-size:14px;margin-top:4px}.icon{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}.wide{grid-column:1/-1}
+.label{font-size:13px;color:var(--muted)}.value{font-size:25px;font-weight:750;margin:7px 0}.goal{font-size:12px;color:var(--muted)}
+.progress{height:7px;background:#2a302c;border-radius:99px;overflow:hidden;margin-top:12px}.bar{height:100%;background:var(--accent);width:0}
+button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;background:var(--accent);color:#10140e;cursor:pointer}.secondary{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.workout{margin-top:10px;padding:14px;background:var(--card2);border-radius:14px}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,12,.96);border-top:1px solid var(--line);display:flex;justify-content:center;gap:8px;padding:10px 8px calc(10px + env(safe-area-inset-bottom));z-index:5}
+nav button{background:transparent;color:var(--muted);padding:8px 12px;font-size:12px}nav button.active{color:var(--accent)}
+.screen{display:none}.screen.active{display:block}
+input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:17px;margin:6px 0 12px}
+.list{display:grid;gap:10px}.notice{padding:12px;border-radius:12px;background:#172016;color:#cceaa1;font-size:13px}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="today" class="screen active">
+    <div class="top"><div><h1>Today</h1><div class="sub" id="date"></div></div><button class="icon" onclick="openWeight()">⚖️</button></div>
+    <div class="grid">
+      <div class="card"><div class="label">Weight</div><div class="value" id="weight">83.0 kg</div><div class="goal">Goal: 75 kg</div><div class="progress"><div class="bar" id="weightBar"></div></div></div>
+      <div class="card"><div class="label">Calories</div><div class="value" id="cal">0</div><div class="goal">of <span id="calGoal">2300</span> kcal</div><div class="progress"><div class="bar" id="calBar"></div></div></div>
+      <div class="card"><div class="label">Protein</div><div class="value" id="protein">0 g</div><div class="goal">of <span id="proteinGoal">180</span> g</div><div class="progress"><div class="bar" id="proteinBar"></div></div></div>
+      <div class="card"><div class="label">Steps</div><div class="value" id="steps">0</div><div class="goal">of <span id="stepsGoal">10000</span></div><div class="progress"><div class="bar" id="stepsBar"></div></div></div>
+      <div class="card"><div class="label">Water</div><div class="value" id="water">0 L</div><div class="goal">Goal: 3.0 L</div><div class="progress"><div class="bar" id="waterBar"></div></div></div>
+      <div class="card"><div class="label">Daily score</div><div class="value" id="score">0%</div><div class="goal">Based on today's tracking</div></div>
+      <div class="card wide"><div class="row"><div><div class="label">Quick Actions</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"><button class="secondary" onclick="addWater()">+250 mL</button><button class="secondary" onclick="addSteps()">+1,000 steps</button><button class="secondary" onclick="addProtein()">+25g protein</button></div></div></div><div class="row"><div><div class="label">Today's Workout</div><div class="value" id="workoutStatus">Full Body A</div><div class="goal">3-day full-body program</div></div><button onclick="startWorkout()">START</button></div></div>
+    </div>
+    <div class="notice" style="margin-top:12px">Interactive V1 prototype: tap the cards, edit goals, and start the workout. Data saves in your browser. V1 foundation: your entries are saved on this device. We’ll add Apple Health, Runna and the full Workout/Nutrition/Progress modules next.</div>
+  </section>
+
+  <section id="profile" class="screen">
+    <div class="top"><div><h1>Profile</h1><div class="sub">Goals control your dashboard</div></div></div>
+    <div class="card">
+      <div class="label">Current weight (kg)</div><input id="pWeight" type="number" step="0.1">
+      <div class="label">Goal weight (kg)</div><input id="pGoalWeight" type="number" step="0.1">
+      <div class="label">Daily calories</div><input id="pCal" type="number">
+      <div class="label">Daily protein (g)</div><input id="pProtein" type="number">
+      <div class="label">Daily steps</div><input id="pSteps" type="number">
+      <div class="label">Weekly workouts</div><input id="pWorkouts" type="number">
+      <div class="label">Weekly runs</div><input id="pRuns" type="number">
+      <div class="label">Sleep goal (hours)</div><input id="pSleep" type="number" step="0.1">
+      <button onclick="saveProfile()">SAVE GOALS</button>
+    </div>
+  </section>
+
+  <section id="workout" class="screen">
+<div class="top"><div><h1>Workout</h1><div class="sub">Your A / B / C program</div></div></div>
+<div class="card"><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="secondary" onclick="selectRoutine('A')">A • Upper</button><button class="secondary" onclick="selectRoutine('B')">B • Legs</button><button class="secondary" onclick="selectRoutine('C')">C • Upper</button></div><div class="row" style="margin-top:14px"><div><div class="label" id="routineTitle">Upper / Chest Priority</div><div class="goal" id="exerciseCount"></div></div><button onclick="beginWorkout()">START</button></div></div>
+<div id="exerciseList" class="list" style="margin-top:10px"></div>
+<div class="card" style="margin-top:10px"><div class="row"><div><div class="label">Workout status</div><div class="value" id="workoutState">Not started</div></div><button class="secondary" onclick="finishWorkout()">FINISH</button></div></div>
+</section>
+
+  <section id="nutrition" class="screen">
+    <div class="top"><div><h1>Nutrition</h1><div class="sub">Your meals, not generic meals</div></div></div>
+    <div class="card"><div class="value" id="nutCal">0 kcal</div><div class="goal"><span id="nutProt">0</span> g protein</div><div class="workout">Breakfast • Lunch • Post-workout • Dinner</div><button style="margin-top:10px" onclick="alert('Nutrition logging is the next build module.')">+ ADD FOOD</button></div>
+  </section>
+
+  <section id="progress" class="screen">
+    <div class="top"><div><h1>Progress</h1><div class="sub">83 kg → 75 kg</div></div></div>
+    <div class="card"><div class="label">Goal journey</div><div class="value" id="journey">0%</div><div class="progress"><div class="bar" id="journeyBar"></div></div><div class="workout">Weekly photos, weight trend, measurements and strength history will live here.</div></div>
+  </section>
+</div>
+
+<nav>
+<button class="active" onclick="show('today',this)">⌂<br>Today</button>
+<button onclick="show('workout',this)">🏋️<br>Workout</button>
+<button onclick="show('nutrition',this)">🍎<br>Nutrition</button>
+<button onclick="show('progress',this)">📈<br>Progress</button>
+<button onclick="show('profile',this)">👤<br>Profile</button>
+</nav>
+
+<script>
+const KEY='fitnessV1';
+let d=JSON.parse(localStorage.getItem(KEY)||'null')||{weight:83,goalWeight:75,calGoal:2300,proteinGoal:150,stepsGoal:10000,workoutsGoal:3,runsGoal:2,sleepGoal:7,cal:0,protein:0,steps:0,water:0,workoutDone:false};
+function save(){localStorage.setItem(KEY,JSON.stringify(d));render()}
+function render(){
+ date.textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+ weight.textContent=d.weight.toFixed(1)+' kg'; cal.textContent=d.cal; protein.textContent=d.protein+' g'; steps.textContent=d.steps.toLocaleString(); water.textContent=d.water.toFixed(1)+' L';
+ calGoal.textContent=d.calGoal; proteinGoal.textContent=d.proteinGoal; stepsGoal.textContent=d.stepsGoal;
+ workoutStatus.textContent=d.workoutDone?'Full Body A ✓':'Full Body A';
+ calBar.style.width=Math.min(100,d.cal/d.calGoal*100)+'%'; proteinBar.style.width=Math.min(100,d.protein/d.proteinGoal*100)+'%'; stepsBar.style.width=Math.min(100,d.steps/d.stepsGoal*100)+'%'; waterBar.style.width=Math.min(100,d.water/3*100)+'%';
+ let p=Math.max(0,Math.min(100,((83-d.weight)/(83-d.goalWeight))*100)); weightBar.style.width=p+'%'; journey.textContent=Math.round(p)+'%'; journeyBar.style.width=p+'%';
+ score.textContent=Math.round((Math.min(1,d.protein/d.proteinGoal)+Math.min(1,d.steps/d.stepsGoal)+Math.min(1,d.water/3)+(d.workoutDone?1:0))/4*100)+'%';
+ nutCal.textContent=d.cal+' kcal'; nutProt.textContent=d.protein;
+ pWeight.value=d.weight;pGoalWeight.value=d.goalWeight;pCal.value=d.calGoal;pProtein.value=d.proteinGoal;pSteps.value=d.stepsGoal;pWorkouts.value=d.workoutsGoal;pRuns.value=d.runsGoal;pSleep.value=d.sleepGoal;
+}
+function show(id,btn){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
+function openWeight(){let v=prompt('Today’s weight (kg)',d.weight);if(v!==null&&!isNaN(v)){d.weight=Number(v);save()}}
+function saveProfile(){d.weight=Number(pWeight.value)||d.weight;d.goalWeight=Number(pGoalWeight.value)||75;d.calGoal=Number(pCal.value)||2300;d.proteinGoal=Number(pProtein.value)||150;d.stepsGoal=Number(pSteps.value)||10000;d.workoutsGoal=Number(pWorkouts.value)||3;d.runsGoal=Number(pRuns.value)||2;d.sleepGoal=Number(pSleep.value)||7;save();show('today',document.querySelector('nav button'))}
+const alternatives={
+"Incline Dumbbell Press":["Incline Barbell Press","Incline Smith Machine Press","Incline Machine Chest Press"],
+"Flat Bench Press":["Flat Dumbbell Press","Flat Machine Chest Press","Smith Machine Bench Press"],
+"Cable Chest Fly":["Pec Deck / Machine Fly","Dumbbell Fly","Cable Crossover"],
+"Lat Pulldown":["Assisted Pull-Up","Neutral-Grip Pulldown","Single-Arm Cable Pulldown"],
+"Seated Cable Row":["Chest-Supported Row","Machine Row","Single-Arm Cable Row"],
+"Dumbbell Lateral Raise":["Cable Lateral Raise","Lateral Raise Machine","Lean-Away Cable Lateral Raise"],
+"Triceps Pushdown":["Rope Pushdown","Straight-Bar Pushdown","Single-Arm Cable Pushdown"],
+"Dumbbell Curl":["EZ-Bar Curl","Cable Curl","Preacher Curl Machine"],
+"Squat / Hack Squat":["Barbell Squat","Hack Squat","Smith Machine Squat"],
+"Leg Press":["Hack Squat","Belt Squat","Smith Machine Squat"],
+"Leg Extension":["Single-Leg Extension"],
+"Romanian Deadlift":["Dumbbell Romanian Deadlift","Smith Machine Romanian Deadlift","45-Degree Back Extension"],
+"Leg Curl":["Seated Leg Curl","Lying Leg Curl","Single-Leg Curl"],
+"Calf Raise":["Seated Calf Raise","Leg Press Calf Raise","Single-Leg Calf Raise"],
+"Cable Crunch":["Machine Crunch","Weighted Decline Crunch","Kneeling Rope Crunch"],
+"Flat Dumbbell Press":["Flat Barbell Bench Press","Machine Chest Press","Smith Machine Bench Press"],
+"Incline Machine Chest Press":["Incline Dumbbell Press","Incline Smith Machine Press","Incline Barbell Press"],
+"Cable Fly":["Pec Deck / Machine Fly","Dumbbell Fly","Cable Crossover"],
+"Chest-Supported Row":["Seated Cable Row","Machine Row","One-Arm Dumbbell Row"],
+"Seated Dumbbell Shoulder Press":["Machine Shoulder Press","Smith Machine Shoulder Press","Arnold Press"],
+"EZ-Bar Curl":["Dumbbell Curl","Cable Curl","Preacher Curl Machine"],
+"Overhead Cable Triceps Extension":["Dumbbell Overhead Extension","EZ-Bar Skull Crusher","Single-Arm Cable Overhead Extension"]
+};
+const routines={A:[["Incline Dumbbell Press",3,"6–10",true],["Flat Bench Press",2,"6–10",false],["Cable Chest Fly",2,"10–15",false],["Lat Pulldown",3,"8–12",true],["Seated Cable Row",2,"8–12",false],["Dumbbell Lateral Raise",3,"12–15",true],["Triceps Pushdown",3,"10–15",true],["Dumbbell Curl",3,"10–15",true]],B:[["Squat / Hack Squat",3,"6–10",true],["Leg Press",2,"10–12",false],["Leg Extension",2,"10–15",false],["Romanian Deadlift",3,"8–12",true],["Leg Curl",2,"10–15",false],["Calf Raise",3,"10–15",true],["Cable Crunch",2,"10–15",false]],C:[["Flat Dumbbell Press",3,"6–10",true],["Incline Machine Chest Press",2,"8–12",false],["Cable Fly",2,"10–15",false],["Chest-Supported Row",3,"8–12",true],["Lat Pulldown",2,"8–12",false],["Seated Dumbbell Shoulder Press",3,"8–12",true],["Dumbbell Lateral Raise",2,"12–15",false],["EZ-Bar Curl",3,"10–15",true],["Overhead Cable Triceps Extension",2,"10–15",false]]};
+let routine='A',activeWorkout=false,exerciseData={};
+function selectRoutine(r){routine=r;activeWorkout=false;exerciseData={};document.getElementById('routineTitle').textContent=r==='B'?'Legs / Hard Session':'Upper / Chest Priority';renderExercises()}
+function renderExercises(){const list=document.getElementById('exerciseList'),arr=routines[routine];document.getElementById('exerciseCount').textContent=arr.length+' exercises';list.innerHTML=arr.map((e,i)=>{const x=exerciseData[routine+'-'+i]||{};const warm=e[3]?`<div style="margin-top:8px"><button class="${x.warmup?'':'secondary'}" onclick="toggleWarmup(${i})">🔥 Warm-up ${x.warmup?'✓':''}</button></div>`:'';return `<div class="card"><div class="row"><div><b>${i+1}. ${x.name||e[0]}</b><div class="sub">${e[1]} working sets • ${e[2]} reps • ${x.status||'Not started'}</div></div><button class="secondary" onclick="exerciseMenu(${i})">⋯</button></div>${warm}<div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">${Array.from({length:e[1]},(_,s)=>`<button class="${x['s'+s]?'':'secondary'}" onclick="logSet(${i},${s})">Set ${s+1}${x['s'+s]?' ✓':''}</button>`).join('')}</div></div>`}).join('')}
+function toggleWarmup(i){const k=routine+'-'+i;if(!exerciseData[k])exerciseData[k]={};exerciseData[k].warmup=!exerciseData[k].warmup;renderExercises()}
+function beginWorkout(){activeWorkout=true;d.workoutDone=false;document.getElementById('workoutState').textContent='In progress';renderExercises()}
+function logSet(i,s){const k=routine+'-'+i;if(!exerciseData[k])exerciseData[k]={};const w=prompt('Weight (kg)',exerciseData[k]['s'+s]?.weight||'');if(w===null)return;const r=prompt('Reps',exerciseData[k]['s'+s]?.reps||'');if(r===null)return;exerciseData[k]['s'+s]={weight:w,reps:r};exerciseData[k].status='In progress';renderExercises()}
+function exerciseMenu(i){
+ const k=routine+'-'+i,e=routines[routine][i],current=(exerciseData[k]&&exerciseData[k].name)||e[0],opts=alternatives[current]||[];
+ let msg='Options for '+current+'
+
+';
+ opts.forEach((o,n)=>msg+=(n+1)+' = '+o+'
+');
+ msg+='
+R = Enter another replacement
+S = Skip exercise';
+ const c=prompt(msg); if(!c)return;
+ if(c.toUpperCase()==='S'){exerciseData[k]={...(exerciseData[k]||{}),status:'Skipped'};renderExercises();return;}
+ let rep=null,idx=parseInt(c,10)-1;
+ if(idx>=0&&idx<opts.length)rep=opts[idx];
+ else if(c.toUpperCase()==='R')rep=prompt('Replacement exercise name','');
+ if(rep){exerciseData[k]={...(exerciseData[k]||{}),name:rep,status:'Replaced for today'};renderExercises();}
+}
+function finishWorkout(){if(!activeWorkout)return alert('Start the workout first.');activeWorkout=false;d.workoutDone=true;document.getElementById('workoutState').textContent='Completed ✓';save();alert('Workout saved.')}
+function addWater(){d.water=Math.min(10,d.water+0.25);save()}
+function addSteps(){d.steps+=1000;save()}
+function addProtein(){d.protein+=25;save()}
+function startWorkout(){d.workoutDone=true;save();alert('Workout started. Full workout logging is the next module.')}
+render();
+</script>
+</body></html>
