@@ -4,153 +4,230 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0d0c">
-<link rel="manifest" href="manifest.webmanifest">
 <title>Fitness V1</title>
 <style>
-:root{--bg:#0b0d0c;--card:#151917;--card2:#1b201d;--text:#f5f7f6;--muted:#9aa39e;--accent:#b7ff3c;--line:#29302c}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.app{max-width:520px;margin:auto;min-height:100vh;padding:18px 16px 92px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-h1{font-size:28px;margin:0}.sub{color:var(--muted);font-size:14px;margin-top:4px}.icon{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:10px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}.wide{grid-column:1/-1}
-.label{font-size:13px;color:var(--muted)}.value{font-size:25px;font-weight:750;margin:7px 0}.goal{font-size:12px;color:var(--muted)}
-.progress{height:7px;background:#2a302c;border-radius:99px;overflow:hidden;margin-top:12px}.bar{height:100%;background:var(--accent);width:0}
-button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;background:var(--accent);color:#10140e;cursor:pointer}.secondary{background:var(--card2);color:var(--text);border:1px solid var(--line)}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.workout{margin-top:10px;padding:14px;background:var(--card2);border-radius:14px}
-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(11,13,12,.96);border-top:1px solid var(--line);display:flex;justify-content:center;gap:8px;padding:10px 8px calc(10px + env(safe-area-inset-bottom));z-index:5}
-nav button{background:transparent;color:var(--muted);padding:8px 12px;font-size:12px}nav button.active{color:var(--accent)}
-.screen{display:none}.screen.active{display:block}
-input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:17px;margin:6px 0 12px}
-.list{display:grid;gap:10px}.notice{padding:12px;border-radius:12px;background:#172016;color:#cceaa1;font-size:13px}
+:root{--bg:#0b0d0c;--card:#151917;--card2:#1c211e;--text:#f5f7f6;--muted:#99a29d;--accent:#b7ff3c;--line:#2a302d;--danger:#ff7a7a}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh}.app{max-width:520px;margin:0 auto;min-height:100vh;padding:18px 16px 95px}
+h1{font-size:28px;margin:0}.sub{font-size:13px;color:var(--muted);margin-top:4px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.icon{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:9px 11px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.wide{grid-column:1/-1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px}.label{color:var(--muted);font-size:12px}
+.value{font-size:24px;font-weight:800;margin:6px 0}.goal{font-size:12px;color:var(--muted)}
+.progress{height:7px;background:#2a302d;border-radius:99px;overflow:hidden;margin-top:10px}.bar{height:100%;background:var(--accent);width:0}
+button{border:0;border-radius:11px;padding:10px 13px;background:var(--accent);color:#10140e;font-weight:800;cursor:pointer}
+.secondary{background:var(--card2);border:1px solid var(--line);color:var(--text)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.screen{display:none}.screen.active{display:block}.list{display:grid;gap:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.pill{border-radius:999px;padding:5px 8px;background:#25301f;color:#ccef9c;font-size:11px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+input,select{width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:16px;margin:5px 0 12px}
+textarea{width:100%;min-height:100px}
+.tabs{display:flex;gap:7px;overflow:auto;margin-bottom:10px}.tabs button{white-space:nowrap}
+.exercise-title{font-weight:800}.setrow{display:grid;grid-template-columns:48px 1fr 1fr 42px;gap:6px;align-items:center;margin-top:7px}
+.setrow input{margin:0;padding:9px}.setnum{color:var(--muted);font-size:12px}.check{padding:9px}
+.notice{background:#182218;color:#cdeaa6;border-radius:12px;padding:11px;font-size:12px;margin-top:12px}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:center;gap:2px;padding:9px 7px calc(9px + env(safe-area-inset-bottom));background:rgba(11,13,12,.97);border-top:1px solid var(--line)}
+nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 10px}nav button.active{color:var(--accent)}
+.small{font-size:11px;color:var(--muted)}.photo-box{height:160px;border:1px dashed #3c443f;border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="app">
-  <section id="today" class="screen active">
-    <div class="top"><div><h1>Today</h1><div class="sub" id="date"></div></div><button class="icon" onclick="openWeight()">⚖️</button></div>
-    <div class="grid">
-      <div class="card"><div class="label">Weight</div><div class="value" id="weight">83.0 kg</div><div class="goal">Goal: 75 kg</div><div class="progress"><div class="bar" id="weightBar"></div></div></div>
-      <div class="card"><div class="label">Calories</div><div class="value" id="cal">0</div><div class="goal">of <span id="calGoal">2300</span> kcal</div><div class="progress"><div class="bar" id="calBar"></div></div></div>
-      <div class="card"><div class="label">Protein</div><div class="value" id="protein">0 g</div><div class="goal">of <span id="proteinGoal">180</span> g</div><div class="progress"><div class="bar" id="proteinBar"></div></div></div>
-      <div class="card"><div class="label">Steps</div><div class="value" id="steps">0</div><div class="goal">of <span id="stepsGoal">10000</span></div><div class="progress"><div class="bar" id="stepsBar"></div></div></div>
-      <div class="card"><div class="label">Water</div><div class="value" id="water">0 L</div><div class="goal">Goal: 3.0 L</div><div class="progress"><div class="bar" id="waterBar"></div></div></div>
-      <div class="card"><div class="label">Daily score</div><div class="value" id="score">0%</div><div class="goal">Based on today's tracking</div></div>
-      <div class="card wide"><div class="row"><div><div class="label">Quick Actions</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"><button class="secondary" onclick="addWater()">+250 mL</button><button class="secondary" onclick="addSteps()">+1,000 steps</button><button class="secondary" onclick="addProtein()">+25g protein</button></div></div></div><div class="row"><div><div class="label">Today's Workout</div><div class="value" id="workoutStatus">Full Body A</div><div class="goal">3-day full-body program</div></div><button onclick="startWorkout()">START</button></div></div>
-    </div>
-    <div class="notice" style="margin-top:12px">Interactive V1 prototype: tap the cards, edit goals, and start the workout. Data saves in your browser. V1 foundation: your entries are saved on this device. We’ll add Apple Health, Runna and the full Workout/Nutrition/Progress modules next.</div>
-  </section>
 
-  <section id="profile" class="screen">
-    <div class="top"><div><h1>Profile</h1><div class="sub">Goals control your dashboard</div></div></div>
-    <div class="card">
-      <div class="label">Current weight (kg)</div><input id="pWeight" type="number" step="0.1">
-      <div class="label">Goal weight (kg)</div><input id="pGoalWeight" type="number" step="0.1">
-      <div class="label">Daily calories</div><input id="pCal" type="number">
-      <div class="label">Daily protein (g)</div><input id="pProtein" type="number">
-      <div class="label">Daily steps</div><input id="pSteps" type="number">
-      <div class="label">Weekly workouts</div><input id="pWorkouts" type="number">
-      <div class="label">Weekly runs</div><input id="pRuns" type="number">
-      <div class="label">Sleep goal (hours)</div><input id="pSleep" type="number" step="0.1">
-      <button onclick="saveProfile()">SAVE GOALS</button>
+<section id="today" class="screen active">
+  <div class="top">
+    <div><h1>Today</h1><div class="sub" id="todayDate"></div></div>
+    <button class="icon" onclick="editWeight()">⚖️</button>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="label">Weight</div><div class="value" id="weightVal">83.0 kg</div><div class="goal">Goal: <span id="weightGoal">75</span> kg</div><div class="progress"><div class="bar" id="weightBar"></div></div></div>
+    <div class="card"><div class="label">Calories</div><div class="value" id="calVal">0</div><div class="goal">of <span id="calGoal">2300</span> kcal</div><div class="progress"><div class="bar" id="calBar"></div></div></div>
+    <div class="card"><div class="label">Protein</div><div class="value" id="proteinVal">0 g</div><div class="goal">of <span id="proteinGoal">150</span> g</div><div class="progress"><div class="bar" id="proteinBar"></div></div></div>
+    <div class="card"><div class="label">Steps</div><div class="value" id="stepsVal">0</div><div class="goal">of <span id="stepsGoal">10000</span></div><div class="progress"><div class="bar" id="stepsBar"></div></div></div>
+    <div class="card"><div class="label">Water</div><div class="value" id="waterVal">0.0 L</div><div class="goal">Goal: 3.0 L</div><div class="progress"><div class="bar" id="waterBar"></div></div></div>
+    <div class="card"><div class="label">Daily score</div><div class="value" id="scoreVal">0%</div><div class="goal">Simple consistency score</div></div>
+    <div class="card wide">
+      <div class="row">
+        <div><div class="label">Today's Workout</div><div class="value" id="todayWorkout">Not started</div><div class="goal">3-day program: Upper / Legs / Upper</div></div>
+        <button onclick="showScreen('workout')">OPEN</button>
+      </div>
+      <div class="actions">
+        <button class="secondary" onclick="addWater(.25)">+250 mL</button>
+        <button class="secondary" onclick="addSteps(1000)">+1,000 steps</button>
+        <button class="secondary" onclick="addProtein(25)">+25 g protein</button>
+        <button class="secondary" onclick="addCalories(250)">+250 kcal</button>
+      </div>
     </div>
-  </section>
-
-  <section id="workout" class="screen">
-<div class="top"><div><h1>Workout</h1><div class="sub">Your A / B / C program</div></div></div>
-<div class="card"><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="secondary" onclick="selectRoutine('A')">A • Upper</button><button class="secondary" onclick="selectRoutine('B')">B • Legs</button><button class="secondary" onclick="selectRoutine('C')">C • Upper</button></div><div class="row" style="margin-top:14px"><div><div class="label" id="routineTitle">Upper / Chest Priority</div><div class="goal" id="exerciseCount"></div></div><button onclick="beginWorkout()">START</button></div></div>
-<div id="exerciseList" class="list" style="margin-top:10px"></div>
-<div class="card" style="margin-top:10px"><div class="row"><div><div class="label">Workout status</div><div class="value" id="workoutState">Not started</div></div><button class="secondary" onclick="finishWorkout()">FINISH</button></div></div>
+  </div>
+  <div class="notice">Your current targets: 83 kg → 75 kg, 2,300 kcal, 150 g protein, 10,000 steps, 3 workouts/week, 2 runs/week, 7 hours sleep.</div>
 </section>
 
-  <section id="nutrition" class="screen">
-    <div class="top"><div><h1>Nutrition</h1><div class="sub">Your meals, not generic meals</div></div></div>
-    <div class="card"><div class="value" id="nutCal">0 kcal</div><div class="goal"><span id="nutProt">0</span> g protein</div><div class="workout">Breakfast • Lunch • Post-workout • Dinner</div><button style="margin-top:10px" onclick="alert('Nutrition logging is the next build module.')">+ ADD FOOD</button></div>
-  </section>
+<section id="workout" class="screen">
+  <div class="top"><div><h1>Workout</h1><div class="sub" id="workoutSub">Upper / Chest Priority</div></div><button class="icon" onclick="resetWorkout()">↻</button></div>
+  <div class="tabs">
+    <button id="routineA" onclick="setRoutine('A')">A — Upper</button>
+    <button id="routineB" class="secondary" onclick="setRoutine('B')">B — Legs</button>
+    <button id="routineC" class="secondary" onclick="setRoutine('C')">C — Upper</button>
+  </div>
+  <div class="card">
+    <div class="row"><div><div class="label" id="routineTitle">Upper / Chest Priority</div><div class="goal" id="routineMeta">8 exercises</div></div><span class="pill" id="workoutPill">Not started</span></div>
+    <div class="actions"><button onclick="startRoutine()">START WORKOUT</button><button class="secondary" onclick="finishRoutine()">FINISH</button></div>
+  </div>
+  <div id="exerciseList" class="list" style="margin-top:10px"></div>
+  <div class="notice">Warm-up sets are separate and never count toward working-set totals. Secondary movements use 2 working sets after the first exercise has prepared the muscle.</div>
+</section>
 
-  <section id="progress" class="screen">
-    <div class="top"><div><h1>Progress</h1><div class="sub">83 kg → 75 kg</div></div></div>
-    <div class="card"><div class="label">Goal journey</div><div class="value" id="journey">0%</div><div class="progress"><div class="bar" id="journeyBar"></div></div><div class="workout">Weekly photos, weight trend, measurements and strength history will live here.</div></div>
-  </section>
+<section id="nutrition" class="screen">
+  <div class="top"><div><h1>Nutrition</h1><div class="sub">Your real meals</div></div></div>
+  <div class="grid">
+    <div class="card"><div class="label">Calories</div><div class="value" id="nCal">0</div><div class="goal">of 2,300 kcal</div></div>
+    <div class="card"><div class="label">Protein</div><div class="value" id="nProtein">0 g</div><div class="goal">of 150 g</div></div>
+  </div>
+  <div id="mealList" class="list" style="margin-top:10px"></div>
+  <div class="card" style="margin-top:10px"><button onclick="alert('Food search and barcode scanning are planned for the next Nutrition build.')">+ ADD FOOD</button></div>
+</section>
+
+<section id="progress" class="screen">
+  <div class="top"><div><h1>Progress</h1><div class="sub">83 kg → 75 kg</div></div></div>
+  <div class="tabs"><button>Weight</button><button class="secondary">Strength</button><button class="secondary">Measurements</button><button class="secondary">Photos</button></div>
+  <div class="card"><div class="label">Goal journey</div><div class="value" id="journeyVal">0%</div><div class="progress"><div class="bar" id="journeyBar"></div></div><div class="small" id="journeyText">8.0 kg to goal</div></div>
+  <div class="card" style="margin-top:10px"><div class="row"><div><div class="label">Weekly Check-In</div><div class="value" style="font-size:20px">Progress Photos</div></div><button onclick="alert('Weekly photo capture will be enabled in the Progress build.')">ADD</button></div><div class="actions"><div class="photo-box" style="flex:1">Front</div><div class="photo-box" style="flex:1">Side</div><div class="photo-box" style="flex:1">Back</div></div></div>
+</section>
+
+<section id="profile" class="screen">
+  <div class="top"><div><h1>Profile</h1><div class="sub">Goals & preferences</div></div></div>
+  <div class="card">
+    <div class="label">Current weight (kg)</div><input id="pWeight" type="number" step="0.1">
+    <div class="label">Goal weight (kg)</div><input id="pGoalWeight" type="number" step="0.1">
+    <div class="label">Daily calories</div><input id="pCal" type="number">
+    <div class="label">Daily protein (g)</div><input id="pProtein" type="number">
+    <div class="label">Daily steps</div><input id="pSteps" type="number">
+    <div class="label">Weekly workouts</div><input id="pWorkouts" type="number">
+    <div class="label">Weekly runs</div><input id="pRuns" type="number">
+    <div class="label">Sleep goal (hours)</div><input id="pSleep" type="number" step="0.1">
+    <button onclick="saveProfile()">SAVE GOALS</button>
+  </div>
+</section>
+
 </div>
 
 <nav>
-<button class="active" onclick="show('today',this)">⌂<br>Today</button>
-<button onclick="show('workout',this)">🏋️<br>Workout</button>
-<button onclick="show('nutrition',this)">🍎<br>Nutrition</button>
-<button onclick="show('progress',this)">📈<br>Progress</button>
-<button onclick="show('profile',this)">👤<br>Profile</button>
+<button class="active" onclick="showScreen('today',this)">⌂<br>Today</button>
+<button onclick="showScreen('workout',this)">🏋️<br>Workout</button>
+<button onclick="showScreen('nutrition',this)">🍎<br>Nutrition</button>
+<button onclick="showScreen('progress',this)">📈<br>Progress</button>
+<button onclick="showScreen('profile',this)">👤<br>Profile</button>
 </nav>
 
 <script>
-const KEY='fitnessV1';
-let d=JSON.parse(localStorage.getItem(KEY)||'null')||{weight:83,goalWeight:75,calGoal:2300,proteinGoal:150,stepsGoal:10000,workoutsGoal:3,runsGoal:2,sleepGoal:7,cal:0,protein:0,steps:0,water:0,workoutDone:false};
-function save(){localStorage.setItem(KEY,JSON.stringify(d));render()}
-function render(){
- date.textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
- weight.textContent=d.weight.toFixed(1)+' kg'; cal.textContent=d.cal; protein.textContent=d.protein+' g'; steps.textContent=d.steps.toLocaleString(); water.textContent=d.water.toFixed(1)+' L';
- calGoal.textContent=d.calGoal; proteinGoal.textContent=d.proteinGoal; stepsGoal.textContent=d.stepsGoal;
- workoutStatus.textContent=d.workoutDone?'Full Body A ✓':'Full Body A';
- calBar.style.width=Math.min(100,d.cal/d.calGoal*100)+'%'; proteinBar.style.width=Math.min(100,d.protein/d.proteinGoal*100)+'%'; stepsBar.style.width=Math.min(100,d.steps/d.stepsGoal*100)+'%'; waterBar.style.width=Math.min(100,d.water/3*100)+'%';
- let p=Math.max(0,Math.min(100,((83-d.weight)/(83-d.goalWeight))*100)); weightBar.style.width=p+'%'; journey.textContent=Math.round(p)+'%'; journeyBar.style.width=p+'%';
- score.textContent=Math.round((Math.min(1,d.protein/d.proteinGoal)+Math.min(1,d.steps/d.stepsGoal)+Math.min(1,d.water/3)+(d.workoutDone?1:0))/4*100)+'%';
- nutCal.textContent=d.cal+' kcal'; nutProt.textContent=d.protein;
- pWeight.value=d.weight;pGoalWeight.value=d.goalWeight;pCal.value=d.calGoal;pProtein.value=d.proteinGoal;pSteps.value=d.stepsGoal;pWorkouts.value=d.workoutsGoal;pRuns.value=d.runsGoal;pSleep.value=d.sleepGoal;
-}
-function show(id,btn){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
-function openWeight(){let v=prompt('Today’s weight (kg)',d.weight);if(v!==null&&!isNaN(v)){d.weight=Number(v);save()}}
-function saveProfile(){d.weight=Number(pWeight.value)||d.weight;d.goalWeight=Number(pGoalWeight.value)||75;d.calGoal=Number(pCal.value)||2300;d.proteinGoal=Number(pProtein.value)||150;d.stepsGoal=Number(pSteps.value)||10000;d.workoutsGoal=Number(pWorkouts.value)||3;d.runsGoal=Number(pRuns.value)||2;d.sleepGoal=Number(pSleep.value)||7;save();show('today',document.querySelector('nav button'))}
-const alternatives={
-"Incline Dumbbell Press":["Incline Barbell Press","Incline Smith Machine Press","Incline Machine Chest Press"],
-"Flat Bench Press":["Flat Dumbbell Press","Flat Machine Chest Press","Smith Machine Bench Press"],
-"Cable Chest Fly":["Pec Deck / Machine Fly","Dumbbell Fly","Cable Crossover"],
-"Lat Pulldown":["Assisted Pull-Up","Neutral-Grip Pulldown","Single-Arm Cable Pulldown"],
-"Seated Cable Row":["Chest-Supported Row","Machine Row","Single-Arm Cable Row"],
-"Dumbbell Lateral Raise":["Cable Lateral Raise","Lateral Raise Machine","Lean-Away Cable Lateral Raise"],
-"Triceps Pushdown":["Rope Pushdown","Straight-Bar Pushdown","Single-Arm Cable Pushdown"],
-"Dumbbell Curl":["EZ-Bar Curl","Cable Curl","Preacher Curl Machine"],
-"Squat / Hack Squat":["Barbell Squat","Hack Squat","Smith Machine Squat"],
-"Leg Press":["Hack Squat","Belt Squat","Smith Machine Squat"],
-"Leg Extension":["Single-Leg Extension"],
-"Romanian Deadlift":["Dumbbell Romanian Deadlift","Smith Machine Romanian Deadlift","45-Degree Back Extension"],
-"Leg Curl":["Seated Leg Curl","Lying Leg Curl","Single-Leg Curl"],
-"Calf Raise":["Seated Calf Raise","Leg Press Calf Raise","Single-Leg Calf Raise"],
-"Cable Crunch":["Machine Crunch","Weighted Decline Crunch","Kneeling Rope Crunch"],
-"Flat Dumbbell Press":["Flat Barbell Bench Press","Machine Chest Press","Smith Machine Bench Press"],
-"Incline Machine Chest Press":["Incline Dumbbell Press","Incline Smith Machine Press","Incline Barbell Press"],
-"Cable Fly":["Pec Deck / Machine Fly","Dumbbell Fly","Cable Crossover"],
-"Chest-Supported Row":["Seated Cable Row","Machine Row","One-Arm Dumbbell Row"],
-"Seated Dumbbell Shoulder Press":["Machine Shoulder Press","Smith Machine Shoulder Press","Arnold Press"],
-"EZ-Bar Curl":["Dumbbell Curl","Cable Curl","Preacher Curl Machine"],
-"Overhead Cable Triceps Extension":["Dumbbell Overhead Extension","EZ-Bar Skull Crusher","Single-Arm Cable Overhead Extension"]
+const STORE='fitness-v1-real';
+let state=JSON.parse(localStorage.getItem(STORE)||'null')||{
+ weight:83,goalWeight:75,calGoal:2300,proteinGoal:150,stepsGoal:10000,workoutsGoal:3,runsGoal:2,sleepGoal:7,
+ cal:0,protein:0,steps:0,water:0,workoutStatus:{A:'Not started',B:'Not started',C:'Not started'},
+ routine:'A',sets:{}
 };
-const routines={A:[["Incline Dumbbell Press",3,"6–10",true],["Flat Bench Press",2,"6–10",false],["Cable Chest Fly",2,"10–15",false],["Lat Pulldown",3,"8–12",true],["Seated Cable Row",2,"8–12",false],["Dumbbell Lateral Raise",3,"12–15",true],["Triceps Pushdown",3,"10–15",true],["Dumbbell Curl",3,"10–15",true]],B:[["Squat / Hack Squat",3,"6–10",true],["Leg Press",2,"10–12",false],["Leg Extension",2,"10–15",false],["Romanian Deadlift",3,"8–12",true],["Leg Curl",2,"10–15",false],["Calf Raise",3,"10–15",true],["Cable Crunch",2,"10–15",false]],C:[["Flat Dumbbell Press",3,"6–10",true],["Incline Machine Chest Press",2,"8–12",false],["Cable Fly",2,"10–15",false],["Chest-Supported Row",3,"8–12",true],["Lat Pulldown",2,"8–12",false],["Seated Dumbbell Shoulder Press",3,"8–12",true],["Dumbbell Lateral Raise",2,"12–15",false],["EZ-Bar Curl",3,"10–15",true],["Overhead Cable Triceps Extension",2,"10–15",false]]};
-let routine='A',activeWorkout=false,exerciseData={};
-function selectRoutine(r){routine=r;activeWorkout=false;exerciseData={};document.getElementById('routineTitle').textContent=r==='B'?'Legs / Hard Session':'Upper / Chest Priority';renderExercises()}
-function renderExercises(){const list=document.getElementById('exerciseList'),arr=routines[routine];document.getElementById('exerciseCount').textContent=arr.length+' exercises';list.innerHTML=arr.map((e,i)=>{const x=exerciseData[routine+'-'+i]||{};const warm=e[3]?`<div style="margin-top:8px"><button class="${x.warmup?'':'secondary'}" onclick="toggleWarmup(${i})">🔥 Warm-up ${x.warmup?'✓':''}</button></div>`:'';return `<div class="card"><div class="row"><div><b>${i+1}. ${x.name||e[0]}</b><div class="sub">${e[1]} working sets • ${e[2]} reps • ${x.status||'Not started'}</div></div><button class="secondary" onclick="exerciseMenu(${i})">⋯</button></div>${warm}<div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">${Array.from({length:e[1]},(_,s)=>`<button class="${x['s'+s]?'':'secondary'}" onclick="logSet(${i},${s})">Set ${s+1}${x['s'+s]?' ✓':''}</button>`).join('')}</div></div>`}).join('')}
-function toggleWarmup(i){const k=routine+'-'+i;if(!exerciseData[k])exerciseData[k]={};exerciseData[k].warmup=!exerciseData[k].warmup;renderExercises()}
-function beginWorkout(){activeWorkout=true;d.workoutDone=false;document.getElementById('workoutState').textContent='In progress';renderExercises()}
-function logSet(i,s){const k=routine+'-'+i;if(!exerciseData[k])exerciseData[k]={};const w=prompt('Weight (kg)',exerciseData[k]['s'+s]?.weight||'');if(w===null)return;const r=prompt('Reps',exerciseData[k]['s'+s]?.reps||'');if(r===null)return;exerciseData[k]['s'+s]={weight:w,reps:r};exerciseData[k].status='In progress';renderExercises()}
-function exerciseMenu(i){
- const k=routine+'-'+i,e=routines[routine][i],current=(exerciseData[k]&&exerciseData[k].name)||e[0],opts=alternatives[current]||[];
- let msg='Options for '+current+'
-
-';
- opts.forEach((o,n)=>msg+=(n+1)+' = '+o+'
-');
- msg+='
-R = Enter another replacement
-S = Skip exercise';
- const c=prompt(msg); if(!c)return;
- if(c.toUpperCase()==='S'){exerciseData[k]={...(exerciseData[k]||{}),status:'Skipped'};renderExercises();return;}
- let rep=null,idx=parseInt(c,10)-1;
- if(idx>=0&&idx<opts.length)rep=opts[idx];
- else if(c.toUpperCase()==='R')rep=prompt('Replacement exercise name','');
- if(rep){exerciseData[k]={...(exerciseData[k]||{}),name:rep,status:'Replaced for today'};renderExercises();}
+const routines={
+ A:{
+  title:'Upper / Chest Priority',
+  ex:[
+   ['Incline Dumbbell Press',3,'6–10',true],['Flat Bench Press',2,'6–10',false],['Cable Chest Fly',2,'10–15',false],
+   ['Lat Pulldown',3,'8–12',true],['Seated Cable Row',2,'8–12',false],
+   ['Dumbbell Lateral Raise',3,'12–15',true],['Triceps Pushdown',3,'10–15',true],['Dumbbell Curl',3,'10–15',true]
+  ]},
+ B:{
+  title:'Legs / Hard Session',
+  ex:[
+   ['Squat / Hack Squat',3,'6–10',true],['Leg Press',2,'10–12',false],['Leg Extension',2,'10–15',false],
+   ['Romanian Deadlift',3,'8–12',true],['Leg Curl',2,'10–15',false],
+   ['Calf Raise',3,'10–15',true],['Cable Crunch',2,'10–15',false]
+  ]},
+ C:{
+  title:'Upper / Chest Priority',
+  ex:[
+   ['Flat Dumbbell Press',3,'6–10',true],['Incline Machine Chest Press',2,'8–12',false],['Cable Fly',2,'10–15',false],
+   ['Chest-Supported Row',3,'8–12',true],['Lat Pulldown',2,'8–12',false],
+   ['Seated Dumbbell Shoulder Press',3,'8–12',true],['Dumbbell Lateral Raise',2,'12–15',false],
+   ['EZ-Bar Curl',3,'10–15',true],['Overhead Cable Triceps Extension',2,'10–15',false]
+  ]}
+};
+const alt={
+'Incline Dumbbell Press':['Incline Barbell Press','Incline Smith Machine Press','Incline Machine Chest Press'],
+'Flat Bench Press':['Flat Dumbbell Press','Flat Machine Chest Press','Smith Machine Bench Press'],
+'Cable Chest Fly':['Pec Deck / Machine Fly','Dumbbell Fly','Cable Crossover'],
+'Lat Pulldown':['Assisted Pull-Up','Neutral-Grip Pulldown','Single-Arm Cable Pulldown'],
+'Seated Cable Row':['Chest-Supported Row','Machine Row','Single-Arm Cable Row'],
+'Dumbbell Lateral Raise':['Cable Lateral Raise','Lateral Raise Machine','Lean-Away Cable Raise'],
+'Triceps Pushdown':['Rope Pushdown','Straight-Bar Pushdown','Single-Arm Cable Pushdown'],
+'Dumbbell Curl':['EZ-Bar Curl','Cable Curl','Preacher Curl Machine'],
+'Squat / Hack Squat':['Barbell Squat','Hack Squat','Smith Machine Squat'],
+'Leg Press':['Hack Squat','Belt Squat','Smith Machine Squat'],
+'Leg Extension':['Single-Leg Extension'],
+'Romanian Deadlift':['Dumbbell Romanian Deadlift','Smith Machine Romanian Deadlift','45-Degree Back Extension'],
+'Leg Curl':['Seated Leg Curl','Lying Leg Curl','Single-Leg Curl'],
+'Calf Raise':['Seated Calf Raise','Leg Press Calf Raise','Single-Leg Calf Raise'],
+'Cable Crunch':['Machine Crunch','Weighted Decline Crunch','Kneeling Rope Crunch'],
+'Flat Dumbbell Press':['Flat Barbell Bench Press','Machine Chest Press','Smith Machine Bench Press'],
+'Incline Machine Chest Press':['Incline Dumbbell Press','Incline Smith Machine Press','Incline Barbell Press'],
+'Cable Fly':['Pec Deck / Machine Fly','Dumbbell Fly','Cable Crossover'],
+'Chest-Supported Row':['Seated Cable Row','Machine Row','One-Arm Dumbbell Row'],
+'Seated Dumbbell Shoulder Press':['Machine Shoulder Press','Smith Machine Shoulder Press','Arnold Press'],
+'EZ-Bar Curl':['Dumbbell Curl','Cable Curl','Preacher Curl Machine'],
+'Overhead Cable Triceps Extension':['Dumbbell Overhead Extension','EZ-Bar Skull Crusher','Single-Arm Cable Overhead Extension']
+};
+function persist(){localStorage.setItem(STORE,JSON.stringify(state));renderAll()}
+function pct(a,b){return Math.max(0,Math.min(100,b?Math.round(a/b*100):0))}
+function renderAll(){
+ todayDate.textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+ weightVal.textContent=state.weight.toFixed(1)+' kg';weightGoal.textContent=state.goalWeight;
+ calVal.textContent=state.cal;calGoal.textContent=state.calGoal;proteinVal.textContent=state.protein+' g';proteinGoal.textContent=state.proteinGoal;
+ stepsVal.textContent=state.steps.toLocaleString();stepsGoal.textContent=state.stepsGoal;waterVal.textContent=state.water.toFixed(1)+' L';
+ calBar.style.width=pct(state.cal,state.calGoal)+'%';proteinBar.style.width=pct(state.protein,state.proteinGoal)+'%';stepsBar.style.width=pct(state.steps,state.stepsGoal)+'%';waterBar.style.width=pct(state.water,3)+'%';
+ let journey=state.weight<=state.goalWeight?100:Math.round(Math.max(0,Math.min(100,(83-state.weight)/(83-state.goalWeight)*100)));weightBar.style.width=journey+'%';journeyBar.style.width=journey+'%';journeyVal.textContent=journey+'%';journeyText.textContent=Math.max(0,state.weight-state.goalWeight).toFixed(1)+' kg to goal';
+ scoreVal.textContent=Math.round((Math.min(1,state.protein/state.proteinGoal)+Math.min(1,state.steps/state.stepsGoal)+Math.min(1,state.water/3)+(state.workoutStatus[state.routine]==='Completed'?1:0))/4*100)+'%';
+ todayWorkout.textContent=state.workoutStatus[state.routine]==='Completed'?'Full Body '+state.routine+' ✓':(state.workoutStatus[state.routine]==='In progress'?'Full Body '+state.routine+' — In progress':'Not started');
+ nCal.textContent=state.cal+' kcal';nProtein.textContent=state.protein+' g';
+ pWeight.value=state.weight;pGoalWeight.value=state.goalWeight;pCal.value=state.calGoal;pProtein.value=state.proteinGoal;pSteps.value=state.stepsGoal;pWorkouts.value=state.workoutsGoal;pRuns.value=state.runsGoal;pSleep.value=state.sleepGoal;
+ workoutSub.textContent=routines[state.routine].title;routineTitle.textContent=routines[state.routine].title;routineMeta.textContent=routines[state.routine].ex.length+' exercises';workoutPill.textContent=state.workoutStatus[state.routine];
+ document.querySelectorAll('#workout .tabs button').forEach(b=>b.classList.add('secondary'));document.getElementById('routine'+state.routine).classList.remove('secondary');
+ renderExercises();renderMeals();
 }
-function finishWorkout(){if(!activeWorkout)return alert('Start the workout first.');activeWorkout=false;d.workoutDone=true;document.getElementById('workoutState').textContent='Completed ✓';save();alert('Workout saved.')}
-function addWater(){d.water=Math.min(10,d.water+0.25);save()}
-function addSteps(){d.steps+=1000;save()}
-function addProtein(){d.protein+=25;save()}
-function startWorkout(){d.workoutDone=true;save();alert('Workout started. Full workout logging is the next module.')}
-render();
+function showScreen(id,btn){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');if(btn){document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}}
+function editWeight(){let v=prompt('Today’s weight (kg)',state.weight);if(v!==null&&!isNaN(v)){state.weight=Number(v);persist()}}
+function addWater(v){state.water=Math.min(10,state.water+v);persist()}
+function addSteps(v){state.steps+=v;persist()}
+function addProtein(v){state.protein+=v;persist()}
+function addCalories(v){state.cal+=v;persist()}
+function saveProfile(){state.weight=Number(pWeight.value)||state.weight;state.goalWeight=Number(pGoalWeight.value)||75;state.calGoal=Number(pCal.value)||2300;state.proteinGoal=Number(pProtein.value)||150;state.stepsGoal=Number(pSteps.value)||10000;state.workoutsGoal=Number(pWorkouts.value)||3;state.runsGoal=Number(pRuns.value)||2;state.sleepGoal=Number(pSleep.value)||7;persist();showScreen('today',document.querySelector('nav button'))}
+function setRoutine(r){state.routine=r;renderAll()}
+function startRoutine(){state.workoutStatus[state.routine]='In progress';persist()}
+function finishRoutine(){if(state.workoutStatus[state.routine]!=='In progress')return alert('Start the workout first.');state.workoutStatus[state.routine]='Completed';persist();alert('Workout saved.');}
+function resetWorkout(){state.workoutStatus[state.routine]='Not started';state.sets={};persist()}
+function logSet(i,s,el){const key=state.routine+'-'+i;const w=el.parentElement.querySelector('.weight').value;const r=el.parentElement.querySelector('.reps').value;if(!state.sets[key])state.sets[key]={};state.sets[key][s]={weight:w,reps:r,done:!state.sets[key][s]?.done};if(state.workoutStatus[state.routine]==='Not started')state.workoutStatus[state.routine]='In progress';persist()}
+function toggleWarm(i){const key=state.routine+'-'+i;if(!state.sets[key])state.sets[key]={};state.sets[key].warm=!state.sets[key].warm;persist()}
+function menuExercise(i){
+ const original=routines[state.routine].ex[i][0],key=state.routine+'-'+i,current=state.sets[key]?.name||original;
+ let opts=alt[current]||[];let msg='Replace '+current+' with:\\n\\n';opts.forEach((o,n)=>msg+=(n+1)+'. '+o+'\\n');msg+='\\nR. Enter another\\nS. Skip';
+ let c=prompt(msg);if(!c)return;if(c.toUpperCase()==='S'){state.sets[key]={...(state.sets[key]||{}),status:'Skipped'};persist();return}
+ let idx=parseInt(c,10)-1;let rep=idx>=0&&idx<opts.length?opts[idx]:null;if(c.toUpperCase()==='R'||!rep)rep=prompt('Replacement exercise name','');
+ if(rep){state.sets[key]={...(state.sets[key]||{}),name:rep,status:'Replaced for today'};persist()}
+}
+function renderExercises(){
+ exerciseList.innerHTML=routines[state.routine].ex.map((e,i)=>{const key=state.routine+'-'+i,x=state.sets[key]||{},name=x.name||e[0],status=x.status||'Not started';
+  const warm=e[3]?`<div class="actions"><button class="secondary" onclick="toggleWarm(${i})">🔥 Warm-up ${x.warm?'✓':''}</button></div>`:'';
+  let rows='';for(let s=0;s<e[1];s++){let q=x[s]||{};rows+=`<div class="setrow"><div class="setnum">Set ${s+1}</div><input class="weight" type="number" step="0.5" placeholder="kg" value="${q.weight||''}"><input class="reps" type="number" placeholder="reps" value="${q.reps||''}"><button class="check ${q.done?'':'secondary'}" onclick="logSet(${i},${s},this)">${q.done?'✓':'OK'}</button></div>`}
+  return `<div class="card"><div class="row"><div><div class="exercise-title">${i+1}. ${name}</div><div class="sub">${e[1]} working sets • ${e[2]} reps • ${status}</div><div class="small">Tap ⋯ for smart alternatives or skip</div></div><button class="secondary" onclick="menuExercise(${i})">⋯</button></div>${warm}<div style="margin-top:9px">${rows}</div></div>`;
+ }).join('')
+}
+const meals=[
+ ['Breakfast',['3 whole eggs','Overnight oats','Whey protein','Granola','Peanut butter','Almonds']],
+ ['Lunch',['180 g chicken breast','Corn','Onion','Greek yogurt','Salsa','Zero-sugar 7UP']],
+ ['Post-workout',['Lean Fit Whey']],
+ ['Dinner',['Grilled chicken wings','Seasoning']]
+];
+function renderMeals(){mealList.innerHTML=meals.map((m,i)=>`<div class="card"><div class="row"><div><div class="label">${m[0]}</div><div class="goal">${m[1].join(' • ')}</div></div><button class="secondary" onclick="mealMenu(${i})">⋯</button></div><div class="actions"><button class="secondary" onclick="alert('Add/remove individual items will be active in the Nutrition build.')">− Item</button><button class="secondary" onclick="alert('Add/remove individual items will be active in the Nutrition build.')">＋ Item</button><button class="secondary" onclick="alert('Replace Meal will be active in the Nutrition build.')">Replace Meal</button></div></div>`).join('')}
+function mealMenu(i){alert('Meal controls planned: + item, − item, Replace Meal, and Make Default.')}
+renderAll();
 </script>
-</body></html>
+</body>
+</html>
