@@ -29,7 +29,7 @@ textarea{width:100%;min-height:100px}
 .notice{background:#182218;color:#cdeaa6;border-radius:12px;padding:11px;font-size:12px;margin-top:12px}
 nav{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:center;gap:2px;padding:9px 7px calc(9px + env(safe-area-inset-bottom));background:rgba(11,13,12,.97);border-top:1px solid var(--line)}
 nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 10px}nav button.active{color:var(--accent)}
-.small{font-size:11px;color:var(--muted)}.history{background:#121613;border-radius:10px;padding:8px;margin-top:8px;font-size:12px;color:#c2cbc5}.progression{color:#cdeaa6;font-weight:700}.photo-box{height:160px;border:1px dashed #3c443f;border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.small{font-size:11px;color:var(--muted)}.iconbtn{width:40px;height:40px;padding:0;border-radius:12px;font-size:20px;display:inline-flex;align-items:center;justify-content:center}.iconbtn.skip{background:var(--card2);color:var(--text);border:1px solid var(--line)}.iconbtn.replace{background:var(--card2);color:var(--accent);border:1px solid var(--line)}.history{background:#121613;border-radius:10px;padding:8px;margin-top:8px;font-size:12px;color:#c2cbc5}.progression{color:#cdeaa6;font-weight:700}.photo-box{height:160px;border:1px dashed #3c443f;border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -280,30 +280,25 @@ function logSet(i,s,button){
   startWorkoutTimer();
   startRest(90);
 }
-function exerciseMenu(i){
+function skipExercise(i){
+  const key=state.routine+'-'+i;
+  state.sets[key]={...(state.sets[key]||{}),status:'Skipped'};
+  persist();
+}
+function replaceExercise(i){
   const key=state.routine+'-'+i;
   const original=routines[state.routine].ex[i][0];
   const current=state.sets[key]?.name||original;
   const opts=alt[current]||[];
-  let msg=`${current}\n\n`;
-  opts.forEach((o,n)=>msg+=`${n+1}. ${o}\n`);
-  msg+=`\nR. Enter another replacement\nS. Skip exercise\nD. Make selected replacement default`;
+  let msg=`Replace ${current} with:
+
+`;
+  opts.forEach((o,n)=>msg+=`${n+1}. ${o}
+`);
+  msg+='
+R. Enter another replacement';
   const c=prompt(msg);
   if(!c)return;
-  if(c.toUpperCase()==='S'){
-    state.sets[key]={...(state.sets[key]||{}),status:'Skipped'};
-    persist();return;
-  }
-  if(c.toUpperCase()==='D'){
-    const d=prompt('Type the replacement to make default',opts[0]||'');
-    if(d){
-      state.defaultReplacements=state.defaultReplacements||{};
-      state.defaultReplacements[original]=d;
-      persist();
-      alert(`${d} is now the default for future ${state.routine} workouts.`);
-    }
-    return;
-  }
   let replacement=null;
   const idx=parseInt(c,10)-1;
   if(Number.isInteger(idx)&&opts[idx])replacement=opts[idx];
@@ -345,7 +340,7 @@ function renderExercises(){
     }
     if(allTop)prog='<div class="progression" style="margin-top:8px">🎯 Increase weight next time</div>';
     const warm=e[3]?`<div class="actions"><button class="secondary" onclick="toggleWarm(${i})">🔥 Warm-up ${x.warm?'✓':''}</button></div>`:'';
-    return `<div class="card"><div class="row"><div><div class="exercise-title">${i+1}. ${name}</div><div class="sub">${e[1]} working sets • ${e[2]} reps • ${status}</div><div class="small">Previous performance shown below each set</div></div><button class="secondary" onclick="exerciseMenu(${i})">⋯</button></div>${warm}<div style="margin-top:9px">${rows}</div>${prog}</div>`;
+    return `<div class="card"><div class="row"><div><div class="exercise-title">${i+1}. ${name}</div><div class="sub">${e[1]} working sets • ${e[2]} reps • ${status}</div><div class="small">Previous performance shown below each set</div></div><div style="display:flex;gap:6px"><button class="iconbtn replace" title="Replace exercise" onclick="replaceExercise(${i})">↻</button><button class="iconbtn skip" title="Skip exercise" onclick="skipExercise(${i})">→</button></div></div>${warm}<div style="margin-top:9px">${rows}</div>${prog}</div>`;
   }).join('');
   const total=arr.length;
   let completed=0;
