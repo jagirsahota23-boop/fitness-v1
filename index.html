@@ -188,7 +188,7 @@ nav button{background:transparent;color:var(--muted);font-size:11px;padding:7px 
     <div id="foodSelectedPanel" style="display:none;margin-top:14px">
       <div class="card">
         <div class="row"><div><div class="label">Selected food</div><div class="value" style="font-size:18px" id="selectedFoodName">Food</div><div class="goal" id="selectedFoodBasis"></div></div><button class="secondary" onclick="clearSelectedFood()">Change</button></div>
-        <div class="serving-box" style="margin-top:12px">
+        <div class="serving-box" style="margin-top:12px"><div><div class="label">Serving size</div><select id="servingPreset" onchange="applyServingPreset()"><option value="30">30 g</option><option value="60">60 g</option><option value="100" selected>100 g</option><option value="custom">Custom</option></select></div>
           <div><div class="label">Amount (g)</div><input id="selectedFoodGrams" type="number" min="1" step="1" value="100"></div>
           <div><div class="label">Meal</div><select id="foodMeal"><option value="0">Breakfast</option><option value="1">Lunch</option><option value="2">Post-workout</option><option value="3">Dinner</option></select></div>
         </div>
@@ -426,9 +426,9 @@ function selectFoodResult(i){
   const n=p.nutriments||{};
   const kcal=foodValue(n['energy-kcal_100g'],foodValue(n.energy_kcal_100g,0));
   const protein=foodValue(n.proteins_100g,0);
-  selectedFood={name:p.product_name+(p.brands?` (${p.brands})`:''),kcal100:kcal,protein100:protein};
+  selectedFood={name:p.product_name+(p.brands?` (${p.brands})`:''),kcal100:kcal,protein100:protein,servingSize:p.serving_size||''};
   document.getElementById('selectedFoodName').textContent=selectedFood.name;
-  document.getElementById('selectedFoodBasis').textContent=`${Math.round(kcal)} kcal • ${protein.toFixed(1)} g protein per 100 g`;
+  document.getElementById('selectedFoodBasis').textContent=`${Math.round(kcal)} kcal • ${protein.toFixed(1)} g protein per 100 g`+(selectedFood.servingSize?` • Label serving: ${selectedFood.servingSize}`:'');
   document.getElementById('selectedFoodGrams').value=100;
   document.getElementById('foodMeal').value=String(window.addFoodMeal||0);
   document.getElementById('foodSelectedPanel').style.display='block';
@@ -439,6 +439,13 @@ function updateSelectedMacros(){
   const g=Math.max(1,Number(document.getElementById('selectedFoodGrams').value)||100);
   const kcal=selectedFood.kcal100*g/100,protein=selectedFood.protein100*g/100;
   document.getElementById('selectedFoodMacros').textContent=`${Math.round(kcal)} kcal • ${protein.toFixed(1)} g protein`;
+}
+
+function applyServingPreset(){
+  const preset=document.getElementById('servingPreset').value;
+  const grams=document.getElementById('selectedFoodGrams');
+  if(preset!=='custom')grams.value=preset;
+  updateSelectedMacros();
 }
 function addSelectedFood(){
   if(!selectedFood)return;
@@ -510,9 +517,9 @@ async function lookupBarcode(code){
     const n=data.product.nutriments||{};
     const kcal=Number(n['energy-kcal_100g'] ?? n['energy_kcal_100g'] ?? 0);
     const protein=Number(n['proteins_100g'] ?? 0);
-    selectedFood={name:(data.product.product_name||'Scanned Product')+(data.product.brands?' ('+data.product.brands+')':''),kcal100:kcal,protein100:protein};
+    selectedFood={name:(data.product.product_name||'Scanned Product')+(data.product.brands?' ('+data.product.brands+')':''),kcal100:kcal,protein100:protein,servingSize:data.product.serving_size||''};
     document.getElementById('selectedFoodName').textContent=selectedFood.name;
-    document.getElementById('selectedFoodBasis').textContent=`${Math.round(kcal)} kcal • ${protein.toFixed(1)} g protein per 100 g`;
+    document.getElementById('selectedFoodBasis').textContent=`${Math.round(kcal)} kcal • ${protein.toFixed(1)} g protein per 100 g`+(selectedFood.servingSize?` • Label serving: ${selectedFood.servingSize}`:'');
     document.getElementById('selectedFoodGrams').value=100;
     document.getElementById('foodMeal').value=String(window.addFoodMeal||0);
     document.getElementById('foodSelectedPanel').style.display='block';
